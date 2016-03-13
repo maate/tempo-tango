@@ -12,12 +12,14 @@ module Parser =
 
   let t = stringReturn "true"  True
   let f = stringReturn "false" False
-  let prop = many1Chars( noneOf " !XFG&|UR" ) |>> fun s -> Prop s
+  let prop = many1Chars( noneOf " !XFG&|UR()" ) |>> fun s -> Prop s
 
-  let primitive = choice[t; f; prop]
 
   let opp = new OperatorPrecedenceParser<expression, unit, unit>()
   let expr = opp.ExpressionParser
+
+  let str_ws s = spaces .>>. pstring s
+  let primitive = choice[t; f; prop] <|> between (str_ws "(") (str_ws ")") expr
   opp.TermParser <- primitive
 
   opp.AddOperator( InfixOperator( "&", spaces, 1, Associativity.Left, fun l r -> And( l, r ) ) )
