@@ -45,7 +45,7 @@ module Automaton =
       else
         ReductionGraph (Set.add trans transitions) trans.t
     in
-    let epsilon_from_option = function
+    let epsilonFromOption = function
       | None    -> Epsilon([])
       | Some(p) -> Epsilon([p])
     match LinearTimeLogic.EpislonTransition state with
@@ -55,7 +55,7 @@ module Automaton =
         AddTransition trans transitions
       | Some(conv_list) ->
         List.fold (fun transitions (next, cond) ->
-          let trans = { link = epsilon_from_option cond; s = state; t = next }
+          let trans = { link = epsilonFromOption cond; s = state; t = next }
           AddTransition trans transitions
         ) transitions conv_list
 
