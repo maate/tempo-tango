@@ -12,25 +12,26 @@ module Parser =
 
   let t = stringReturn "true"  True
   let f = stringReturn "false" False
-  let prop = many1Chars( noneOf " !XFG&|UR()" ) |>> fun s -> Prop s
+  let prop = many1Chars( noneOf " \r\n\t!XFG&|UR()" ) |>> fun s -> Prop s
 
 
   let opp = new OperatorPrecedenceParser<expression, unit, unit>()
   let expr = opp.ExpressionParser
 
-  let str_ws s = spaces .>>. pstring s
+  let ws = spaces
+  let str_ws s = ws >>. pstring s .>> ws
   let primitive = choice[t; f; prop] <|> between (str_ws "(") (str_ws ")") expr
-  opp.TermParser <- primitive
+  opp.TermParser <- ws >>. primitive .>> ws
 
-  opp.AddOperator( InfixOperator( "&", spaces, 1, Associativity.Left, fun l r -> And( l, r ) ) )
-  opp.AddOperator( InfixOperator( "|", spaces, 2, Associativity.Left, fun l r -> Or( l, r ) ) )
-  opp.AddOperator( InfixOperator( "U", spaces, 3, Associativity.Left, fun l r -> Until( l, r ) ) )
-  opp.AddOperator( InfixOperator( "R", spaces, 3, Associativity.Left, fun l r -> Release( l, r ) ) )
+  opp.AddOperator( InfixOperator( "&", ws, 1, Associativity.Left, fun l r -> And( l, r ) ) )
+  opp.AddOperator( InfixOperator( "|", ws, 2, Associativity.Left, fun l r -> Or( l, r ) ) )
+  opp.AddOperator( InfixOperator( "U", ws, 3, Associativity.Left, fun l r -> Until( l, r ) ) )
+  opp.AddOperator( InfixOperator( "R", ws, 3, Associativity.Left, fun l r -> Release( l, r ) ) )
 
-  opp.AddOperator( PrefixOperator("!", spaces, 4, true, fun x -> Not( x ) ) )
-  opp.AddOperator( PrefixOperator("X", spaces, 4, true, fun x -> Next( x ) ) )
-  opp.AddOperator( PrefixOperator("F", spaces, 4, true, fun x -> Finally( x ) ) )
-  opp.AddOperator( PrefixOperator("G", spaces, 4, true, fun x -> Globally( x ) ) )
+  opp.AddOperator( PrefixOperator("!", ws, 4, true, fun x -> Not( x ) ) )
+  opp.AddOperator( PrefixOperator("X", ws, 4, true, fun x -> Next( x ) ) )
+  opp.AddOperator( PrefixOperator("F", ws, 4, true, fun x -> Finally( x ) ) )
+  opp.AddOperator( PrefixOperator("G", ws, 4, true, fun x -> Globally( x ) ) )
 
   let syntax = expr
 

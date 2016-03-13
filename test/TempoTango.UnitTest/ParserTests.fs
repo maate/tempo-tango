@@ -43,3 +43,16 @@ module ParserTests =
   [<Test>]
   let ``Can parse p1|(p2&q1)|q2``() =
     Assert.AreEqual( Parser.Parse "p1|(p2&q1)|q2", Or( Or( Prop "p1", And( Prop "p2", Prop "q1" ) ), Prop "q2" ) )
+
+  [<Test>]
+  let ``Can parse p1|(p2&q1)|q2 with white spaces``() =
+    Parser.PrintParse @"p1
+                      \\t           |(
+                                      p2 & q1
+                                    )
+                                    |q2"
+    Assert.AreEqual( Parser.Parse @"p1
+                                    |(
+                                      p2 & q1
+                                    )
+                                    |q2", Or( Or( Prop "p1", And( Prop "p2", Prop "q1" ) ), Prop "q2" ) )
