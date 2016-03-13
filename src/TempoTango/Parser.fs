@@ -16,33 +16,20 @@ module Parser =
 
   let primitive = choice[t; f; prop]
 
-  let expr, exprImpl = createParserForwardedToRef()
+  let opp = new OperatorPrecedenceParser<expression, unit, unit>()
+  let expr = opp.ExpressionParser
+  opp.TermParser <- primitive
 
-  let apply f p =
-    parse
-        { let! v = p
-          return f v }
+  opp.AddOperator( InfixOperator( "&", spaces, 1, Associativity.Left, fun l r -> And( l, r ) ) )
+  opp.AddOperator( InfixOperator( "|", spaces, 2, Associativity.Left, fun l r -> Or( l, r ) ) )
+  opp.AddOperator( InfixOperator( "U", spaces, 3, Associativity.Left, fun l r -> Until( l, r ) ) )
+  opp.AddOperator( InfixOperator( "R", spaces, 3, Associativity.Left, fun l r -> Release( l, r ) ) )
 
-  let op1 = (anyOf "!XFG") .>>. expr |> apply ( fun (c, e) -> match c with
-                                                              | '!' -> Not e
-                                                              | 'X' -> Next e
-                                                              | 'F' -> Finally e
-                                                              | 'G' -> Globally e
-                                                              | _   -> failwith "err" );
+  opp.AddOperator( PrefixOperator("!", spaces, 4, true, fun x -> Not( x ) ) )
+  opp.AddOperator( PrefixOperator("X", spaces, 4, true, fun x -> Next( x ) ) )
+  opp.AddOperator( PrefixOperator("F", spaces, 4, true, fun x -> Finally( x ) ) )
+  opp.AddOperator( PrefixOperator("G", spaces, 4, true, fun x -> Globally( x ) ) )
 
-  let varOp2 = parse {
-    let! first = primitive
-    let! res = 
-      choice [ (anyOf "&|UR") .>>. expr |> apply (fun ( c , e ) -> match c with 
-                                                                           | '|' -> Or(first, e)
-                                                                           | '&' -> And(first, e)
-                                                                           | _   -> failwith "err" )
-               parse { return first } ]
-               
-    return res }
-
-  do exprImpl := spaces >>. choice[op1;varOp2]
-  
   let syntax = expr
 
   let Parse str = match run syntax str with
