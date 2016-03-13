@@ -1,0 +1,1 @@
+"c:\Program Files (x86)\NUnit.org\nunit-console\nunit3-console.exe" "test\TempoTango.UnitTest\bin\Debug\TempoTango.UnitTest.dll

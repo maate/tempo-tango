@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TempoTango", "src\TempoTango\TempoTango.fsproj", "{820B3856-0688-4164-BEAC-0C0574A9DF51}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{BB150674-BDCE-4720-AC2B-FC9CDC254F20}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TempoTango.UnitTest", "test\TempoTango.UnitTest\TempoTango.UnitTest.fsproj", "{63F8BABE-A0EA-4AF0-ABDF-A62B6378A46D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{820B3856-0688-4164-BEAC-0C0574A9DF51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{820B3856-0688-4164-BEAC-0C0574A9DF51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{820B3856-0688-4164-BEAC-0C0574A9DF51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{820B3856-0688-4164-BEAC-0C0574A9DF51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63F8BABE-A0EA-4AF0-ABDF-A62B6378A46D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63F8BABE-A0EA-4AF0-ABDF-A62B6378A46D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63F8BABE-A0EA-4AF0-ABDF-A62B6378A46D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63F8BABE-A0EA-4AF0-ABDF-A62B6378A46D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{63F8BABE-A0EA-4AF0-ABDF-A62B6378A46D} = {BB150674-BDCE-4720-AC2B-FC9CDC254F20}
+	EndGlobalSection
+EndGlobal
