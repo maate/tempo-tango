@@ -18,34 +18,30 @@ module Parser =
 
   let expr, exprImpl = createParserForwardedToRef()
 
-  let expressionOperation1 = anyOf "!XFG"                 >>=? fun operator ->
-                             expr                         >>=? fun operand ->
-                             preturn operand              |>> ( match operator with
-                                                                | '!' -> Not
-                                                                | 'X' -> Next
-                                                                | 'F' -> Finally
-                                                                | 'G' -> Globally
-                                                                | _   -> failwith "err" )
+  let apply f p =
+    parse
+        { let! v = p
+          return f v }
 
-//  System.Diagnostics.Debugger.Launch()
-  let expressionOperation2 = expr .>>. ( anyOf "&|UR" ) .>>. expr |>> fun ( ( l, op ), r ) ->
-                                                                              ( match op with
-                                                                                | '&' -> And( l, r )
-                                                                                | '|' -> Or( l, r )
-                                                                                | 'U' -> Until( l, r )
-                                                                                | 'R' -> Release( l, r )
-                                                                                | _   -> failwith "err" )
-//                           >>=? fun operandL ->
-//                             anyOf "&|UR"                 >>=? fun operator ->
-//                             primitive                         >>=? fun operandR ->
-//                             preturn (operandL, operandR) |>> ( match operator with
-//                                                                | '&' -> And
-//                                                                | '|' -> Or
-//                                                                | 'U' -> Until
-//                                                                | 'R' -> Release
-//                                                                | _   -> failwith "err" )
+  let op1 = (anyOf "!XFG") .>>. expr |> apply ( fun (c, e) -> match c with
+                                                              | '!' -> Not e
+                                                              | 'X' -> Next e
+                                                              | 'F' -> Finally e
+                                                              | 'G' -> Globally e
+                                                              | _   -> failwith "err" );
 
-  do exprImpl := spaces >>. choice[expressionOperation1; attempt expressionOperation2; primitive] .>> eof
+  let varOp2 = parse {
+    let! first = primitive
+    let! res = 
+      choice [ (anyOf "&|UR") .>>. expr |> apply (fun ( c , e ) -> match c with 
+                                                                           | '|' -> Or(first, e)
+                                                                           | '&' -> And(first, e)
+                                                                           | _   -> failwith "err" )
+               parse { return first } ]
+               
+    return res }
+
+  do exprImpl := spaces >>. choice[op1;varOp2]
   
   let syntax = expr
 

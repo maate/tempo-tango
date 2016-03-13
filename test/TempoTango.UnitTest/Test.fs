@@ -9,7 +9,7 @@ module Tests =
   [<Test>]
   let ``Test``() =
     let formula = NegativeNormalForm ( Or( Prop "p", Prop "q" ) )
-    printfn "%s" ( ToString formula )
+//    printfn "%s" ( ToString formula )
     let formula_set = Set.singleton formula
     let a = Automaton.construct_gba_from formula_set in
     let g = Automaton.to_graph a in

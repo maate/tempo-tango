@@ -4,11 +4,6 @@
 //#load "Library1.fs"
 //open tempo_tango
 
-#r "../packages/FParsec.1.0.2/lib/net40-client/FParsec.dll"
-#r "../packages/FParsec.1.0.2/lib/net40-client/FParsecCS.dll"
 
-#load "Parser.fs"
-open TempoTango.Parser
 
-Parser.Parse( "true" )
 

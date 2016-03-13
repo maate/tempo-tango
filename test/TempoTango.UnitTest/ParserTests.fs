@@ -14,7 +14,6 @@ module ParserTests =
 
   [<Test>]
   let ``Can parse p``() =
-    Assert.AreEqual( Parser.Parse "p", Prop "p" )
     Assert.AreEqual( Parser.Parse "p ", Prop "p" )
 
   [<Test>]
@@ -31,11 +30,9 @@ module ParserTests =
 
   [<Test>]
   let ``Can parse p&q``() =
-    Parser.PrintParse "p&q"
     Assert.AreEqual( Parser.Parse "p&q", And(Prop "p", Prop "q" ) )
 
-
-//  [<Test>]
-//  let ``Can parse Xp|!q``() =
-//    Parser.PrintParse "Xp|!q"
-//    Assert.AreEqual( Parser.Parse "Xp|!q", Or( Next( Prop "p" ), Not( Prop "q" ) ) )
+  [<Test>]
+  let ``Can parse Xp|!q``() =
+    Parser.PrintParse "Xp|!q"
+    Assert.AreEqual( Parser.Parse "Xp|!q", Or( Next( Prop "p" ), Not( Prop "q" ) ) )

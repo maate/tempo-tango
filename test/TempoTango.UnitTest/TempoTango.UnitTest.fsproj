@@ -57,7 +57,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\tempo-tango\TempoTango.fsproj">
+    <ProjectReference Include="..\..\src\TempoTango\TempoTango.fsproj">
       <Name>TempoTango</Name>
       <Project>{820b3856-0688-4164-beac-0c0574a9df51}</Project>
       <Private>True</Private>
