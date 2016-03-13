@@ -55,8 +55,8 @@ module LinearTimeLogic =
         | _ -> "(" + ( ToString exp ) + ")"
       in
       match exp with
-        | True            -> "⊤"
-        | False         -> "⊥"
+        | True           -> "⊤"
+        | False          -> "⊥"
         | Prop(p)        -> p
         | Not(exp)       -> "¬" + (print_paren exp)
         | And(l, r)      -> (print_paren l) + " ∧ " + (print_paren r)
@@ -83,8 +83,8 @@ module LinearTimeLogic =
       | Release(l, r) -> Release(NegativeNormalForm l, NegativeNormalForm r)
       | Not(formula) ->
         match formula with
-          | True           -> False
-          | False        -> True
+          | True          -> False
+          | False         -> True
           | Prop(_)       -> Not(formula)
           | Not(p)        -> NegativeNormalForm p
           | And(l, r)     -> Or(NegativeNormalForm (Not l), NegativeNormalForm (Not r))

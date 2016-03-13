@@ -35,7 +35,6 @@ module Automaton =
   let TransitionToString { link = link; s = s; t = t } =
     Printf.sprintf "%s -> %s (%s)" (LinearTimeLogic.SetToString s) (LinearTimeLogic.SetToString t) (linkToString link)
 
-  (* known_states: add sigma_transformed states *)
   let rec ReductionGraph transitions ( state : Set<expression> ) =
     let isKnown trans transitions =
       Set.exists (OrderedTransition.(=) trans) transitions
@@ -60,39 +59,40 @@ module Automaton =
           AddTransition trans transitions
         ) transitions conv_list
 
-  let construct_from start_state =
+  let constructFrom start_state =
     { starts = [start_state]; finals = []; transitions = ReductionGraph Set.empty start_state }
 
-  let to_graph automaton =
+  /// Returns the Graph form of the automaton
+  let ToGraph automaton =
     let set_to_s = LinearTimeLogic.SetToString
     let g = (Graph.new_graph "Automaton")
-    let is_start s = List.exists ((=) s) automaton.starts in
-    let add_node_function s = (if is_start s then Graph.add_start else Graph.add_node) in
+    let IsStart s = List.exists ((=) s) automaton.starts in
+    let addNodeFn s = (if IsStart s then Graph.AddStart else Graph.AddNode) in
     List.fold (fun g { link = link; s = s; t = t } ->
       let s_string = set_to_s s in
       let t_string = set_to_s t in
-      let g = (add_node_function s) g s_string in
-      let g = (add_node_function t) g t_string in
+      let g = (addNodeFn s) g s_string in
+      let g = (addNodeFn t) g t_string in
       Graph.link g s_string t_string (linkToString link)
     ) g (Set.toList automaton.transitions)
 
-  let unique_postpones transitions =
+  let uniquePostpones transitions =
     Seq.distinct (List.fold (fun postponed { link = link } ->
       match link with
         | Epsilon(p) -> p @ postponed
         | _ -> postponed
     ) [] transitions)
 
-  let setup_sigma_postpones postpones  =
+  let setupSigmaPostpones postpones  =
     List.map (fun trans ->
       match trans.link with
         | Sigma(c, p) -> { trans with link = Sigma(c, p @ postpones) }
         | _ -> trans)
 
-  let skip_epsilons automaton =
+  let skipEpsilons automaton =
     let transitions = Set.toList automaton.transitions
-    let postpones   = unique_postpones transitions
-    let transitions = setup_sigma_postpones ( Seq.toList postpones ) transitions
+    let postpones   = uniquePostpones transitions
+    let transitions = setupSigmaPostpones ( Seq.toList postpones ) transitions
     let rec skip transitions =
       let (epsilons, sigmas) = List.partition (fun t ->
         match t.link with
@@ -125,7 +125,7 @@ module Automaton =
             | _ -> failwith "unexpected non-epsilon value"
     { automaton with transitions = Set.ofList (skip transitions) }
 
-  let is_mergeable l r =
+  let isMergeable l r =
     if l.s = r.s && l.t = r.t then
       match (l.link, r.link) with
         | (Epsilon(l_ps), Epsilon(r_ps))
@@ -134,7 +134,7 @@ module Automaton =
     else
       false
 
-  let merge_transitions l r =
+  let mergeTransitions l r =
     let merged_link =
       match (l.link, r.link) with
         | (Epsilon(_), Epsilon(_)) -> l.link
@@ -148,19 +148,19 @@ module Automaton =
     in
     { l with link = merged_link }
 
-  let merge_to_parallels transitions trans =
-    match List.filter (is_mergeable trans) transitions with
+  let mergeToParallels transitions trans =
+    match List.filter (isMergeable trans) transitions with
       | [] -> trans :: transitions
       | merge_to :: _ ->
-        merge_transitions trans merge_to :: List.filter ( fun item -> item = merge_to) transitions 
+        mergeTransitions trans merge_to :: List.filter ( fun item -> item = merge_to) transitions 
 
-  let join_sigmas automaton =
+  let joinSigmas automaton =
     let transitions = List.fold ( fun transitions trans ->
-      merge_to_parallels transitions trans ) [] (Set.toList automaton.transitions)
+      mergeToParallels transitions trans ) [] (Set.toList automaton.transitions)
     { automaton with transitions = Set.ofList transitions }
 
-  let construct_gba_from ltl_set =
-    join_sigmas
-      (skip_epsilons
-         (construct_from ltl_set))
+  let ConstructAutomatonFrom ltl_set =
+    joinSigmas
+      (skipEpsilons
+         (constructFrom ltl_set))
 

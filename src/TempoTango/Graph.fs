@@ -31,7 +31,7 @@ module Graph =
   let find_node {nodes = nodes} name =
     List.find (fun n -> n.name = name) nodes
 
-  let add_node_internal graph node =
+  let AddNode_internal graph node =
     try
     begin
       ignore (find_node graph node.name);
@@ -40,16 +40,16 @@ module Graph =
       | failwith -> { graph with nodes = node :: graph.nodes }
 
   let add_final graph name =
-    add_node_internal graph { name = name; shape = DoubleCircle; start = false }
+    AddNode_internal graph { name = name; shape = DoubleCircle; start = false }
 
-  let add_start graph name =
-    add_node_internal graph { name = name; shape = Circle; start = true }
+  let AddStart graph name =
+    AddNode_internal graph { name = name; shape = Circle; start = true }
 
   let add_start_final graph name =
-    add_node_internal graph { name = name; shape = DoubleCircle; start = true }
+    AddNode_internal graph { name = name; shape = DoubleCircle; start = true }
 
-  let add_node graph name =
-    add_node_internal graph { name = name; shape = Circle; start = false }
+  let AddNode graph name =
+    AddNode_internal graph { name = name; shape = Circle; start = false }
 
   let link graph s_name t_name label =
     { graph with edges = { label = label; s = find_node graph s_name; t = find_node graph t_name } :: graph.edges}
