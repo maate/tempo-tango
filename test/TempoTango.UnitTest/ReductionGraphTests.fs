@@ -6,6 +6,9 @@ open TempoTango.Automaton
 open TempoTango.LinearTimeLogic
 open TempoTango.Parser
 
+/// Tests that the reduction graph for LTL expression
+///               G(!p|Fq)
+/// corresponds to /doc/reduction-graph.png
 module ReductionGraphTests = 
   let gba = Parser.Parse "G(!p|Fq)" |> NegativeNormalForm |> Set.singleton |> Automaton.constructFrom
 
@@ -21,7 +24,11 @@ module ReductionGraphTests =
 
   [<Test>]
   let ``GBA has ε transition G(¬p ∨ Fq) -> ε -> ¬p ∨ Fq,Xϕ``() =
-    transitions |> Set.isProperSubset ( Set.ofList [ ε, Set.singleton ( ϕ ), Set.ofList [ Parser.Parse "¬p ∨ Fq"; Next ϕ ] ] ) |> Assert.IsTrue
+    transitions |> Set.isProperSubset ( Set.ofList [
+                                          ε,
+                                          ϕ                                  |> Set.singleton,
+                                          [ Parser.Parse "¬p ∨ Fq"; Next ϕ ] |> Set.ofList ] )
+                |> Assert.IsTrue
 
   [<Test>]
   let ``GBA has transition ¬p ∨ Fq,Xϕ -> ε -> ¬p,Xϕ``() =
@@ -39,7 +46,11 @@ module ReductionGraphTests =
 
   [<Test>]
   let ``GBA has transition ¬p ∨ Fq,Xϕ -> ε -> Fq,Xϕ``() =
-    transitions |> Set.isProperSubset ( Set.ofList [ ε, Set.ofList [ Parser.Parse "¬p ∨ Fq"; Next ϕ ], Set.ofList [ Finally ( Prop "q" ); Next ϕ ] ] ) |> Assert.IsTrue
+    transitions |> Set.isProperSubset ( Set.ofList [
+                                          ε,
+                                          [ Parser.Parse "¬p ∨ Fq"; Next ϕ ] |> Set.ofList,
+                                          [ Finally ( Prop "q" ); Next ϕ ]    |> Set.ofList ] )
+                |> Assert.IsTrue
 
   [<Test>]
   let ``GBA has transition Fq,Xϕ -> ε -> q,Xϕ``() =
