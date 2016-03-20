@@ -42,6 +42,7 @@
     <Compile Include="EpislonTransitionTests.fs" />
     <Compile Include="Test.fs" />
     <Compile Include="ParserTests.fs" />
+    <Compile Include="ReductionGraphTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

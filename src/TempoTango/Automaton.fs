@@ -38,16 +38,17 @@ module Automaton =
   let rec ReductionGraph transitions ( state : Set<expression> ) =
     let isKnown trans transitions =
       Set.exists (OrderedTransition.(=) trans) transitions
-    in
+
     let AddTransition trans transitions =
       if isKnown trans transitions then
         transitions
       else
         ReductionGraph (Set.add trans transitions) trans.t
-    in
+
     let epsilonFromOption = function
       | None    -> Epsilon([])
       | Some(p) -> Epsilon([p])
+
     match LinearTimeLogic.EpislonTransition state with
       | None ->
         let (conds, next) = LinearTimeLogic.SigmaTransform ( Set.toList state )

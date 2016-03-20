@@ -42,11 +42,6 @@ module LinearTimeLogic =
         (size, value)) (0, False) set
     ( largest, Set.remove largest set )
 
-  let rec SetToString set =
-    let string_formulae = Set.map ( fun item -> item.ToString() )
-    "{ " + (String.concat ", " ( string_formulae set ) ) + "}"
-
-
   let rec ToString exp = 
     let print_paren exp =
       match exp with
@@ -55,17 +50,21 @@ module LinearTimeLogic =
         | _ -> "(" + ( ToString exp ) + ")"
       in
       match exp with
-        | True           -> "⊤"
-        | False          -> "⊥"
+        | True           -> "T"
+        | False          -> "F"
         | Prop(p)        -> p
-        | Not(exp)       -> "¬" + (print_paren exp)
-        | And(l, r)      -> (print_paren l) + " ∧ " + (print_paren r)
-        | Or(l, r)       -> (print_paren l) + " ∨ " + (print_paren r)
+        | Not(exp)       -> "!" + (print_paren exp)
+        | And(l, r)      -> (print_paren l) + " & " + (print_paren r)
+        | Or(l, r)       -> (print_paren l) + " | " + (print_paren r)
         | Next(exp)      -> "X " + (print_paren exp)
         | Finally(exp)   -> "F " + (print_paren exp)
         | Globally(exp)  -> "G " + (print_paren exp)
         | Until(l, r)    -> (print_paren l) + " U " + (print_paren r)
         | Release(l, r)  -> (print_paren l) + " R " + (print_paren r)
+
+  let rec SetToString set =
+    let string_formulae = Set.map ( fun item -> ToString item )
+    "{ " + (String.concat ", " ( string_formulae set ) ) + "}"
 
   /// Rewrites a formula to it's negative normal form (NNF).
   /// The NNF is a positive Boolean combination of Temporal Formula.
