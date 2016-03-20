@@ -10,11 +10,11 @@ open TempoTango.Parser
 ///               G(!p|Fq)
 /// corresponds to /doc/reduction-graph.png
 module ReductionGraphTests = 
-  let gba = Parser.Parse "G(!p|Fq)" |> NegativeNormalForm |> Set.singleton |> Automaton.constructFrom
+  let ϕ = Parser.Parse "G(!p|Fq)"
+
+  let gba = ϕ |> NegativeNormalForm |> Set.singleton |> Automaton.constructFrom
 
   let transitions = gba.transitions |> Set.map ( fun trans -> trans.edge, trans.s, trans.t )
-
-  let ϕ = Parser.Parse "G(!p|Fq)"
 
   let ε = Epsilon([])
 
