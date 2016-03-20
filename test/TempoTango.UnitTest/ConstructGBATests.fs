@@ -6,9 +6,9 @@ open TempoTango.Automaton
 open TempoTango.LinearTimeLogic
 open TempoTango.Parser
 
-/// Tests that the reduction graph for LTL expression
+/// Tests that the GBA for LTL expression (without any reductions)
 ///               G(!p|Fq)
-/// corresponds to /doc/reduction-graph.png
+/// corresponds to /doc/gba.png
 module ReductionGraphTests = 
   let ϕ = Parser.Parse "G(!p|Fq)"
 

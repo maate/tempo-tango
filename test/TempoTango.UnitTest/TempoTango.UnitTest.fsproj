@@ -43,6 +43,7 @@
     <Compile Include="Test.fs" />
     <Compile Include="ParserTests.fs" />
     <Compile Include="ConstructGBATests.fs" />
+    <Compile Include="SkipEpsilonTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
