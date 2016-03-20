@@ -12,7 +12,7 @@ open TempoTango.Parser
 module ReductionGraphTests = 
   let gba = Parser.Parse "G(!p|Fq)" |> NegativeNormalForm |> Set.singleton |> Automaton.constructFrom
 
-  let transitions = gba.transitions |> Set.map ( function trans -> trans.link, trans.s, trans.t )
+  let transitions = gba.transitions |> Set.map ( fun trans -> trans.edge, trans.s, trans.t )
 
   let ϕ = Parser.Parse "G(!p|Fq)"
 

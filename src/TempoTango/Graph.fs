@@ -51,7 +51,7 @@ module Graph =
   let AddNode graph name =
     AddNode_internal graph { name = name; shape = Circle; start = false }
 
-  let link graph s_name t_name label =
+  let edge graph s_name t_name label =
     { graph with edges = { label = label; s = find_node graph s_name; t = find_node graph t_name } :: graph.edges}
 
   open Printf

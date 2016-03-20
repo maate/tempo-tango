@@ -4,17 +4,17 @@ open Graph
 
 module Automaton =
 
-  type link = Epsilon of LinearTimeLogic.expression list
+  type edge = Epsilon of LinearTimeLogic.expression list
               | Sigma of LinearTimeLogic.expression list * LinearTimeLogic.expression list
   type state = Set<expression>
   type transition = {
-    link : link;
+    edge : edge;
     s: state;
     t: state;
   }
   module OrderedTransition = begin
     type t = transition
-    let compare a b = a.link.Equals b.link && a.s.Equals b.s && a.t.Equals b.t
+    let compare a b = a.edge.Equals b.edge && a.s.Equals b.s && a.t.Equals b.t
     let (=) a b = compare a b
   end
 
@@ -24,16 +24,16 @@ module Automaton =
     transitions: Set<transition>;
   }
 
-  let linkToString link =
+  let linkToString edge =
     let format_conds conds =
       String.concat " ∧ " (List.map LinearTimeLogic.ToString conds)
     in
-    match link with
+    match edge with
     | Epsilon(postpones)       -> "ε" + (String.concat "" (List.map (fun f -> ", !" + (LinearTimeLogic.ToString(f))) postpones))
     | Sigma(conds, postpones)  -> "Σ" + (format_conds conds) + (String.concat "" (List.map (fun f -> ", " + (LinearTimeLogic.ToString(f))) postpones))
 
-  let TransitionToString { link = link; s = s; t = t } =
-    Printf.sprintf "%s -> %s (%s)" (LinearTimeLogic.SetToString s) (LinearTimeLogic.SetToString t) (linkToString link)
+  let TransitionToString { edge = edge; s = s; t = t } =
+    Printf.sprintf "%s -> %s (%s)" (LinearTimeLogic.SetToString s) (LinearTimeLogic.SetToString t) (linkToString edge)
 
   let rec GBA transitions ( state : Set<expression> ) =
     let isKnown trans transitions =
@@ -52,11 +52,11 @@ module Automaton =
     match LinearTimeLogic.EpislonTransition state with
       | None ->
         let (conds, next) = LinearTimeLogic.SigmaTransform ( Set.toList state )
-        let trans = { link = Sigma(conds, []); s = state; t = next }
+        let trans = { edge = Sigma(conds, []); s = state; t = next }
         AddTransition trans transitions
       | Some(conv_list) ->
         List.fold (fun transitions (next, cond) ->
-          let trans = { link = epsilonFromOption cond; s = state; t = next }
+          let trans = { edge = epsilonFromOption cond; s = state; t = next }
           AddTransition trans transitions
         ) transitions conv_list
 
@@ -69,25 +69,25 @@ module Automaton =
     let g = (Graph.new_graph "Automaton")
     let IsStart s = List.exists ((=) s) automaton.starts in
     let addNodeFn s = (if IsStart s then Graph.AddStart else Graph.AddNode) in
-    List.fold (fun g { link = link; s = s; t = t } ->
+    List.fold (fun g { edge = edge; s = s; t = t } ->
       let s_string = set_to_s s in
       let t_string = set_to_s t in
       let g = (addNodeFn s) g s_string in
       let g = (addNodeFn t) g t_string in
-      Graph.link g s_string t_string (linkToString link)
+      Graph.edge g s_string t_string (linkToString edge)
     ) g (Set.toList automaton.transitions)
 
   let uniquePostpones transitions =
-    Seq.distinct (List.fold (fun postponed { link = link } ->
-      match link with
+    Seq.distinct (List.fold (fun postponed { edge = edge } ->
+      match edge with
         | Epsilon(p) -> p @ postponed
         | _ -> postponed
     ) [] transitions)
 
   let setupSigmaPostpones postpones  =
     List.map (fun trans ->
-      match trans.link with
-        | Sigma(c, p) -> { trans with link = Sigma(c, p @ postpones) }
+      match trans.edge with
+        | Sigma(c, p) -> { trans with edge = Sigma(c, p @ postpones) }
         | _ -> trans)
 
   let skipEpsilons automaton =
@@ -96,7 +96,7 @@ module Automaton =
     let transitions = setupSigmaPostpones ( Seq.toList postpones ) transitions
     let rec skip transitions =
       let (epsilons, sigmas) = List.partition (fun t ->
-        match t.link with
+        match t.edge with
           | Epsilon(_) -> true | Sigma(_, _) -> false ) transitions
       if List.isEmpty epsilons then
         sigmas
@@ -114,21 +114,21 @@ module Automaton =
               else
                 (rewrite_rule n) :: transitions ) rest nexts
             skip transitions
-          match target.link with
+          match target.edge with
             | Epsilon([]) ->
               replace (fun next -> { next with s = target.s })
             | Epsilon(ps) ->
               let new_link = function
-                | Epsilon(ps')  -> Epsilon(ps @ ps')
+                | Epsilon(ps') -> Epsilon(ps @ ps')
                 | Sigma(c, constraints) -> Sigma(c, List.filter (fun p -> not (List.exists ((=) p) ps)) constraints)
               in
-              replace (fun next -> { next with s = target.s; link = new_link next.link })
+              replace (fun next -> { next with s = target.s; edge = new_link next.edge })
             | _ -> failwith "unexpected non-epsilon value"
     { automaton with transitions = Set.ofList (skip transitions) }
 
   let isMergeable l r =
     if l.s = r.s && l.t = r.t then
-      match (l.link, r.link) with
+      match (l.edge, r.edge) with
         | (Epsilon(l_ps), Epsilon(r_ps))
         | (Sigma(_, l_ps), Sigma(_, r_ps)) -> l_ps = r_ps
         | _ -> false
@@ -137,17 +137,17 @@ module Automaton =
 
   let mergeTransitions l r =
     let merged_link =
-      match (l.link, r.link) with
-        | (Epsilon(_), Epsilon(_)) -> l.link
+      match (l.edge, r.edge) with
+        | (Epsilon(_), Epsilon(_)) -> l.edge
         | (Sigma(l_cond, ps), Sigma(r_cond, _)) ->
         begin
           match LinearTimeLogic.CalculateOr (LinearTimeLogic.AndConcat l_cond) (LinearTimeLogic.AndConcat r_cond) with
             | LinearTimeLogic.True -> Sigma([], ps)
             | prop -> Sigma([prop], ps)
         end
-        | _ -> failwith (Printf.sprintf "Unable to merge %s with %s" (linkToString l.link) (linkToString r.link))
+        | _ -> failwith (Printf.sprintf "Unable to merge %s with %s" (linkToString l.edge) (linkToString r.edge))
     in
-    { l with link = merged_link }
+    { l with edge = merged_link }
 
   let mergeToParallels transitions trans =
     match List.filter (isMergeable trans) transitions with
