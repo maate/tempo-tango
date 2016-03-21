@@ -139,7 +139,7 @@ module LinearTimeLogic =
   /// Calculate sigma transform condition and result set
   /// input set should be reduced and consistent
   let SigmaTransform set =
-    List.fold (fun (conds, next) -> function
+    Set.fold (fun (conds, next) -> function
       | True    -> (conds, next)
       | False -> failwith "inconsistent False"
       | Prop(p) ->

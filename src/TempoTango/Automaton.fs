@@ -51,7 +51,7 @@ module Automaton =
 
     match LinearTimeLogic.EpislonTransition state with
       | None ->
-        let (conds, next) = LinearTimeLogic.SigmaTransform ( Set.toList state )
+        let (conds, next) = LinearTimeLogic.SigmaTransform ( state )
         let trans = { edge = Sigma(conds, []); s = state; t = next }
         AddTransition trans transitions
       | Some(conv_list) ->
@@ -69,13 +69,13 @@ module Automaton =
     let g = (Graph.new_graph "Automaton")
     let IsStart s = List.exists ((=) s) automaton.starts in
     let addNodeFn s = (if IsStart s then Graph.AddStart else Graph.AddNode) in
-    List.fold (fun g { edge = edge; s = s; t = t } ->
+    Set.fold (fun g { edge = edge; s = s; t = t } ->
       let s_string = set_to_s s in
       let t_string = set_to_s t in
       let g = (addNodeFn s) g s_string in
       let g = (addNodeFn t) g t_string in
       Graph.edge g s_string t_string (linkToString edge)
-    ) g (Set.toList automaton.transitions)
+    ) g automaton.transitions
 
   let uniquePostpones transitions =
     Seq.distinct (List.fold (fun postponed { edge = edge } ->
@@ -91,9 +91,9 @@ module Automaton =
         | _ -> trans)
 
   let skipEpsilons automaton =
-    let transitions = Set.toList automaton.transitions
-    let postpones   = uniquePostpones transitions
-    let transitions = setupSigmaPostpones ( Seq.toList postpones ) transitions
+    let transitions = automaton.transitions |> Set.toList
+    let postpones   = uniquePostpones transitions |> Seq.toList
+    let transitions = setupSigmaPostpones postpones transitions
     let rec skip transitions =
       let (epsilons, sigmas) = List.partition (fun t ->
         match t.edge with
@@ -153,11 +153,11 @@ module Automaton =
     match List.filter (isMergeable trans) transitions with
       | [] -> trans :: transitions
       | merge_to :: _ ->
-        mergeTransitions trans merge_to :: List.filter ( fun item -> item = merge_to) transitions 
+        mergeTransitions trans merge_to :: List.filter ( fun item -> item <> merge_to) transitions 
 
   let joinSigmas automaton =
-    let transitions = List.fold ( fun transitions trans ->
-      mergeToParallels transitions trans ) [] (Set.toList automaton.transitions)
+    let transitions = Set.fold ( fun transitions trans ->
+      mergeToParallels transitions trans ) [] automaton.transitions
     { automaton with transitions = Set.ofList transitions }
 
   let ConstructAutomatonFrom ltl_set =

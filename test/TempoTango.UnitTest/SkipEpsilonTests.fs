@@ -6,7 +6,7 @@ open TempoTango.Automaton
 open TempoTango.LinearTimeLogic
 open TempoTango.Parser
 
-/// Tests that the FullGBA for LTL expression (without any reductions)
+/// Tests that the ReducedGBA for LTL expression (without any reductions)
 ///               G(!p|Fq)
 /// corresponds to /doc/reduced-gba.png
 module SkipEpsilonTests =
