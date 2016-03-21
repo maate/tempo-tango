@@ -25,63 +25,61 @@ module Graph =
     edges    : edge list;
   }
 
-  let new_graph title =
+  let NewGraph title =
     { kind = DiGraph; title = title; settings = []; nodes = []; edges = [] }
 
-  let find_node {nodes = nodes} name =
-    List.find (fun n -> n.name = name) nodes
+  let FindNode {nodes = nodes} name =
+    List.tryFind (fun n -> n.name = name) nodes
 
-  let AddNode_internal graph node =
-    try
-    begin
-      ignore (find_node graph node.name);
-      graph
-    end with
-      | failwith -> { graph with nodes = node :: graph.nodes }
+  let AddNodeInternal graph node =
+    match FindNode graph node.name with
+      | None -> { graph with nodes = node :: graph.nodes }
+      | Some(_) -> graph
 
-  let add_final graph name =
-    AddNode_internal graph { name = name; shape = DoubleCircle; start = false }
+  let AddFinal graph name =
+    AddNodeInternal graph { name = name; shape = DoubleCircle; start = false }
 
   let AddStart graph name =
-    AddNode_internal graph { name = name; shape = Circle; start = true }
+    AddNodeInternal graph { name = name; shape = Circle; start = true }
 
-  let add_start_final graph name =
-    AddNode_internal graph { name = name; shape = DoubleCircle; start = true }
+  let AddStartFinal graph name =
+    AddNodeInternal graph { name = name; shape = DoubleCircle; start = true }
 
   let AddNode graph name =
-    AddNode_internal graph { name = name; shape = Circle; start = false }
+    AddNodeInternal graph { name = name; shape = Circle; start = false }
 
   let edge graph s_name t_name label =
-    { graph with edges = { label = label; s = find_node graph s_name; t = find_node graph t_name } :: graph.edges}
+    let s = FindNode graph s_name;
+    let t = FindNode graph t_name;
+    { graph with edges = { label = label; s = s.Value; t = t.Value } :: graph.edges}
 
   open Printf
 
-  let graph_kind_to_string = function
+  let GraphKindtoString = function
     | DiGraph -> "digraph"
     | Graph   -> "graph"
 
-  let print_nodes out nodes =
+  let PrintNodes out nodes =
     let print_node_list nodes =
       if not (List.isEmpty nodes) then
         (List.iter (fun n -> fprintf out "\"%s\" " n.name) nodes;
          fprintf out ";\n")
-    in
-    let (circle, double) = List.partition (fun n -> n.shape = Circle) nodes in
+    let (circle, double) = List.partition (fun n -> n.shape = Circle) nodes
     fprintf out "\tnode [shape = doublecircle]; ";
     print_node_list double;
     fprintf out "\tnode [shape = circle]; ";
     print_node_list circle;
-    let starts = List.filter (fun n -> n.start) nodes in // used by be find_all instead of filter
-    List.iter (fun n -> fprintf out "\t\"_nil_%s\" [style=\"invis\"];\n\t\"_nil_%s\" -> \"%s\";\n" n.name n.name n.name) starts
+    let starts = List.filter (fun n -> n.start) nodes
+    List.iter (fun n -> fprintf out "\t\"_nil_%s\" [style=\"invis\",fixedsize=true];\n\t\"_nil_%s\" -> \"%s\";\n" n.name n.name n.name) starts
 
-  let print_edges out =
+  let PrintEdges out =
     List.iter (fun e ->
       fprintf out "\t\"%s\" -> \"%s\" [ label = \"%s\" ];\n" e.s.name e.t.name e.label
     )
 
-  let print_graph out { kind = kind; title = title; settings = settings; nodes = nodes; edges = edges } =
-    fprintf out "%s %s {\n" (graph_kind_to_string kind) title;
+  let PrintGraph out { kind = kind; title = title; settings = settings; nodes = nodes; edges = edges } =
+    fprintf out "%s %s {\n" (GraphKindtoString kind) title;
     List.iter (fprintf out "\t%s\n") settings;
-    print_nodes out nodes;
-    print_edges out edges;
-    fprintf out "}\n"
+    PrintNodes out nodes;
+    PrintEdges out edges;
+    fprintf out "}"

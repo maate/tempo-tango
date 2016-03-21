@@ -27,7 +27,6 @@ module Automaton =
   let linkToString edge =
     let format_conds conds =
       String.concat " ∧ " (List.map LinearTimeLogic.ToString conds)
-    in
     match edge with
     | Epsilon(postpones)       -> "ε" + (String.concat "" (List.map (fun f -> ", !" + (LinearTimeLogic.ToString(f))) postpones))
     | Sigma(conds, postpones)  -> "Σ" + (format_conds conds) + (String.concat "" (List.map (fun f -> ", " + (LinearTimeLogic.ToString(f))) postpones))
@@ -66,14 +65,18 @@ module Automaton =
   /// Returns the Graph form of the automaton
   let ToGraph automaton =
     let set_to_s = LinearTimeLogic.SetToString
-    let g = (Graph.new_graph "Automaton")
-    let IsStart s = List.exists ((=) s) automaton.starts in
-    let addNodeFn s = (if IsStart s then Graph.AddStart else Graph.AddNode) in
+    let g = (Graph.NewGraph "Automaton")
+    let IsStart s = List.exists ((=) s) automaton.starts
+    let IsFinal s = List.exists ((=) s) automaton.finals
+    let addNodeFn s = (if IsStart s && IsFinal s then Graph.AddStartFinal
+                       elif IsStart s then Graph.AddStart
+                       elif IsFinal s then Graph.AddFinal
+                       else Graph.AddNode )
     Set.fold (fun g { edge = edge; s = s; t = t } ->
-      let s_string = set_to_s s in
-      let t_string = set_to_s t in
-      let g = (addNodeFn s) g s_string in
-      let g = (addNodeFn t) g t_string in
+      let s_string = set_to_s s
+      let t_string = set_to_s t
+      let g = (addNodeFn s) g s_string
+      let g = (addNodeFn t) g t_string
       Graph.edge g s_string t_string (linkToString edge)
     ) g automaton.transitions
 
@@ -160,8 +163,13 @@ module Automaton =
       mergeToParallels transitions trans ) [] automaton.transitions
     { automaton with transitions = Set.ofList transitions }
 
+  let addFinals automaton =
+    let finals = Set.fold ( fun f t -> match t with
+                                         | { s = s'; t = t'; edge = Sigma( _, [] ) } when s' = t'                     -> t.s :: f
+                                         | { s = s'; t = t'; edge = Sigma( [], _ ) } when s' = set [] && t' = set []  -> t.s :: f
+                                         | _                                                                          -> f ) [] automaton.transitions
+    { automaton with finals = finals }
+
   let ConstructAutomatonFrom ltl_set =
-    joinSigmas
-      (skipEpsilons
-         (constructFrom ltl_set))
+    ltl_set |> constructFrom |> skipEpsilons |> joinSigmas |> addFinals
 
