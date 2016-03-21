@@ -42,7 +42,7 @@
     <Compile Include="EpislonTransitionTests.fs" />
     <Compile Include="Test.fs" />
     <Compile Include="ParserTests.fs" />
-    <Compile Include="ConstructGBATests.fs" />
+    <Compile Include="FullGBATests.fs" />
     <Compile Include="SkipEpsilonTests.fs" />
   </ItemGroup>
   <ItemGroup>

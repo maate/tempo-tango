@@ -6,7 +6,7 @@ open TempoTango.Automaton
 open TempoTango.LinearTimeLogic
 open TempoTango.Parser
 
-/// Tests that the GBA for LTL expression (without any reductions)
+/// Tests that the FullGBA for LTL expression (without any reductions)
 ///               G(!p|Fq)
 /// corresponds to /doc/reduced-gba.png
 module SkipEpsilonTests =
@@ -24,7 +24,7 @@ module SkipEpsilonTests =
     Assert.AreEqual( reducedGba.starts.Item 0, Set.singleton ( Parser.Parse "G(!p|Fq)" ) );
 
   [<Test>]
-  let ``GBA has transition ϕ -> Σ -> Fq,ϕ``() =
+  let ``ReducedGBA has transition ϕ -> Σ -> Fq,ϕ``() =
     transitions |> Set.isProperSubset ( Set.ofList [
                                           Σ,
                                           ϕ                                  |> Set.singleton,
@@ -32,7 +32,7 @@ module SkipEpsilonTests =
                 |> Assert.IsTrue
 
   [<Test>]
-  let ``GBA has transition ϕ -> Σq Fq -> ϕ``() =
+  let ``ReducedGBA has transition ϕ -> Σq Fq -> ϕ``() =
     transitions |> Set.isProperSubset ( Set.ofList [
                                           Sigma( [Prop "q"], [ Finally ( Prop "q" ) ] ),
                                           ϕ                                  |> Set.singleton,
@@ -40,7 +40,7 @@ module SkipEpsilonTests =
                 |> Assert.IsTrue
 
   [<Test>]
-  let ``GBA has transition ϕ -> Σ¬p Fq -> ϕ``() =
+  let ``ReducedGBA has transition ϕ -> Σ¬p Fq -> ϕ``() =
     transitions |> Set.isProperSubset ( Set.ofList [
                                           Sigma( [Not ( Prop "p" ) ], [ Finally ( Prop "q" ) ] ),
                                           ϕ                                  |> Set.singleton,
@@ -48,7 +48,7 @@ module SkipEpsilonTests =
                 |> Assert.IsTrue
 
   [<Test>]
-  let ``GBA has transition Fq,ϕ -> Σq Fq -> ϕ``() =
+  let ``ReducedGBA has transition Fq,ϕ -> Σq Fq -> ϕ``() =
     transitions |> Set.isProperSubset ( Set.ofList [
                                           Sigma( [Prop "q" ], [ Finally ( Prop "q" ) ] ),
                                           [ Finally( Prop "q" ); ϕ ]         |> Set.ofList,
@@ -56,7 +56,7 @@ module SkipEpsilonTests =
                 |> Assert.IsTrue
 
   [<Test>]
-  let ``GBA has transition Fq,ϕ -> Σ¬p∧q Fq -> ϕ``() =
+  let ``ReducedGBA has transition Fq,ϕ -> Σ¬p∧q Fq -> ϕ``() =
     transitions |> Set.isProperSubset ( Set.ofList [
                                           Sigma( [ Not( Prop "p" ); Prop "q" ], [ Finally ( Prop "q" ) ] ),
                                           [ Finally( Prop "q" ); ϕ ]         |> Set.ofList,
@@ -64,7 +64,7 @@ module SkipEpsilonTests =
                 |> Assert.IsTrue
 
   [<Test>]
-  let ``GBA has transition Fq,ϕ -> Σ -> Fq,ϕ``() =
+  let ``ReducedGBA has transition Fq,ϕ -> Σ -> Fq,ϕ``() =
     transitions |> Set.isProperSubset ( Set.ofList [
                                           Σ,
                                           [ Finally( Prop "q" ); ϕ ]         |> Set.ofList,
@@ -72,7 +72,7 @@ module SkipEpsilonTests =
                 |> Assert.IsTrue
 
   [<Test>]
-  let ``GBA has transition Fq,ϕ -> Σ¬p -> Fq,ϕ``() =
+  let ``ReducedGBA has transition Fq,ϕ -> Σ¬p -> Fq,ϕ``() =
     transitions |> Set.isProperSubset ( Set.ofList [
                                           Sigma( [ Not( Prop "p" ) ], [] ),
                                           [ Finally( Prop "q" ); ϕ ]         |> Set.ofList,
@@ -80,5 +80,5 @@ module SkipEpsilonTests =
                 |> Assert.IsTrue
 
   [<Test>]
-  let ``GBA has 7 transitions``() =
+  let ``ReducedGBA has 7 transitions``() =
     Assert.AreEqual( transitions.Count, 7 )

@@ -35,7 +35,7 @@ module Automaton =
   let TransitionToString { edge = edge; s = s; t = t } =
     Printf.sprintf "%s -> %s (%s)" (LinearTimeLogic.SetToString s) (LinearTimeLogic.SetToString t) (linkToString edge)
 
-  let rec GBA transitions ( state : Set<expression> ) =
+  let rec FullGBA transitions ( state : Set<expression> ) =
     let isKnown trans transitions =
       Set.exists (OrderedTransition.(=) trans) transitions
 
@@ -43,7 +43,7 @@ module Automaton =
       if isKnown trans transitions then
         transitions
       else
-        GBA (Set.add trans transitions) trans.t
+        FullGBA (Set.add trans transitions) trans.t
 
     let epsilonFromOption = function
       | None    -> Epsilon([])
@@ -61,7 +61,7 @@ module Automaton =
         ) transitions conv_list
 
   let constructFrom start_state =
-    { starts = [start_state]; finals = []; transitions = GBA Set.empty start_state }
+    { starts = [start_state]; finals = []; transitions = FullGBA Set.empty start_state }
 
   /// Returns the Graph form of the automaton
   let ToGraph automaton =
