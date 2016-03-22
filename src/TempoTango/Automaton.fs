@@ -59,6 +59,25 @@ module Automaton =
           AddTransition trans transitions
         ) transitions conv_list
 
+  let Union l r =
+    let startsWithAnyOf ( states : state list ) transitions =
+      let s = Set.ofList states
+      Set.filter ( fun trans -> s.Contains trans.s ) transitions
+
+    let automaton = { starts      = [l.starts.Item 0; r.starts.Item 0];
+                      transitions = set [];
+                      alphabet    = set [] }
+
+    let transitions_l = l.transitions |> startsWithAnyOf l.starts
+    let transitions_r = r.transitions |> startsWithAnyOf r.starts
+
+    let crossproduct l1 l2 =
+      seq { for el1 in l1 do
+              for el2 in l2 do
+                yield el1, el2 };
+
+    transitions_l, transitions_r
+
   let GetAlphabet transitions =
     Set.fold( fun a trans ->
                 match trans.edge with
