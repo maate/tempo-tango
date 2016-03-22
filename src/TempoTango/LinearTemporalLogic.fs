@@ -1,20 +1,38 @@
 ﻿namespace TempoTango
 
 module LinearTimeLogic =
-
   // Represents a linear time logic (LTL) expression
   type expression =
     | True
     | False
-    | Prop     of string
-    | Not      of expression
-    | And      of expression * expression
-    | Or       of expression * expression
-    | Next     of expression
-    | Finally  of expression
-    | Globally of expression
-    | Until    of expression * expression
-    | Release  of expression * expression
+    | Prop       of string
+    | Not        of expression
+    | And        of expression * expression
+    | Or         of expression * expression
+    | Next       of expression
+    | Finally    of expression
+    | Globally   of expression
+    | Until      of expression * expression
+    | Release    of expression * expression
+    | WeakUntil  of expression * expression
+    | Implicate  of expression * expression
+    /// l is optional, but always followed by r.
+    | Optional   of expression * expression
+
+  let rec CleanExpression exp =
+    match exp with
+      | True | False | Prop(_) -> exp
+      | Not p                  -> Not ( CleanExpression p )
+      | And ( l, r )           -> And ( CleanExpression l, CleanExpression r )
+      | Or ( l, r )            -> Or ( CleanExpression l, CleanExpression r )
+      | Next p                 -> Next ( CleanExpression p )
+      | Finally p              -> Finally ( CleanExpression p )
+      | Globally p             -> Globally ( CleanExpression p )
+      | Until ( l, r )         -> Until ( CleanExpression l, CleanExpression r )
+      | Release ( l, r )       -> Release ( CleanExpression l, CleanExpression r )
+      | WeakUntil ( l, r )     -> Or( Until ( CleanExpression l, CleanExpression r ), Globally ( CleanExpression l ) )
+      | Implicate ( l, r )     -> Or( Not( CleanExpression l ), CleanExpression r )
+      | Optional ( l, r )      -> Or( And( CleanExpression l, Next ( CleanExpression r ) ), CleanExpression r )
 
   /// Counts the size of an expression
   let rec sizeOf exp =
@@ -29,7 +47,10 @@ module LinearTimeLogic =
       | And(l, r)
       | Or(l, r)
       | Until(l, r)
-      | Release(l, r)  -> 1 + max ( sizeOf l ) ( sizeOf r )
+      | Release(l, r)    -> 1 + max ( sizeOf l ) ( sizeOf r )
+      | WeakUntil(l, r)  -> failwith "Cannot use WeakUntil here. Call CleanExpression first!"
+      | Implicate(l, r)  -> failwith "Cannot use Implicate here. Call CleanExpression first!"
+      | Optional(l, r) -> failwith "Cannot use Optional here. Call CleanExpression first!"
 
   /// Removes the largest item from a set.
   /// Returns a tuple of the removed item and the new set.
@@ -50,17 +71,20 @@ module LinearTimeLogic =
         | _ -> "(" + ( ToString exp ) + ")"
       in
       match exp with
-        | True           -> "T"
-        | False          -> "F"
-        | Prop(p)        -> p
-        | Not(exp)       -> "!" + (print_paren exp)
-        | And(l, r)      -> (print_paren l) + " & " + (print_paren r)
-        | Or(l, r)       -> (print_paren l) + " | " + (print_paren r)
-        | Next(exp)      -> "X " + (print_paren exp)
-        | Finally(exp)   -> "F " + (print_paren exp)
-        | Globally(exp)  -> "G " + (print_paren exp)
-        | Until(l, r)    -> (print_paren l) + " U " + (print_paren r)
-        | Release(l, r)  -> (print_paren l) + " R " + (print_paren r)
+        | True            -> "T"
+        | False           -> "F"
+        | Prop(p)         -> p
+        | Not(exp)        -> "!" + (print_paren exp)
+        | And(l, r)       -> (print_paren l) + " & " + (print_paren r)
+        | Or(l, r)        -> (print_paren l) + " | " + (print_paren r)
+        | Next(exp)       -> "X " + (print_paren exp)
+        | Finally(exp)    -> "F " + (print_paren exp)
+        | Globally(exp)   -> "G " + (print_paren exp)
+        | Until(l, r)     -> (print_paren l) + " U " + (print_paren r)
+        | WeakUntil(l, r) -> failwith "Cannot use WeakUntil here. Call CleanExpression first!"
+        | Release(l, r)   -> (print_paren l) + " R " + (print_paren r)
+        | Implicate(l, r) -> failwith "Cannot use Implicate here. Call CleanExpression first!"
+        | Optional(l, r) -> failwith "Cannot use Optional here. Call CleanExpression first!"
 
   let rec SetToString set =
     let string_formulae = Set.map ( fun item -> ToString item )
@@ -73,26 +97,32 @@ module LinearTimeLogic =
   let rec NegativeNormalForm formula =
     match formula with
       | True | False | Prop(_) -> formula
-      | And(l, r)     -> And(NegativeNormalForm l, NegativeNormalForm r)
-      | Or(l, r)      -> Or(NegativeNormalForm l, NegativeNormalForm r)
-      | Next(p)       -> Next(NegativeNormalForm p)
-      | Finally(p)    -> Finally(NegativeNormalForm p)
-      | Globally(p)   -> Globally(NegativeNormalForm p)
-      | Until(l, r)   -> Until(NegativeNormalForm l, NegativeNormalForm r)
-      | Release(l, r) -> Release(NegativeNormalForm l, NegativeNormalForm r)
+      | And(l, r)       -> And(NegativeNormalForm l, NegativeNormalForm r)
+      | Or(l, r)        -> Or(NegativeNormalForm l, NegativeNormalForm r)
+      | Next(p)         -> Next(NegativeNormalForm p)
+      | Finally(p)      -> Finally(NegativeNormalForm p)
+      | Globally(p)     -> Globally(NegativeNormalForm p)
+      | Until(l, r)     -> Until(NegativeNormalForm l, NegativeNormalForm r)
+      | Release(l, r)   -> Release(NegativeNormalForm l, NegativeNormalForm r)
+      | WeakUntil(l,r)  -> failwith "Cannot use WeakUntil here. Call CleanExpression first!"
+      | Implicate(l, r) -> failwith "Cannot use Implicate here. Call CleanExpression first!"
+      | Optional(l, r) -> failwith "Cannot use Optional here. Call CleanExpression first!"
       | Not(formula) ->
         match formula with
-          | True          -> False
-          | False         -> True
-          | Prop(_)       -> Not(formula)
-          | Not(p)        -> NegativeNormalForm p
-          | And(l, r)     -> Or(NegativeNormalForm (Not l), NegativeNormalForm (Not r))
-          | Or(l, r)      -> And(NegativeNormalForm (Not l), NegativeNormalForm (Not r))
-          | Next(p)       -> Next(NegativeNormalForm (Not p))
-          | Finally(p)    -> Finally(NegativeNormalForm (Not p))
-          | Globally(p)   -> Globally(NegativeNormalForm (Not p))
-          | Until(l, r)   -> Release(NegativeNormalForm (Not l), NegativeNormalForm (Not r))
-          | Release(l, r) -> Until(NegativeNormalForm (Not l), NegativeNormalForm (Not r))
+          | True            -> False
+          | False           -> True
+          | Prop(_)         -> Not(formula)
+          | Not(p)          -> NegativeNormalForm p
+          | And(l, r)       -> Or(NegativeNormalForm (Not l), NegativeNormalForm (Not r))
+          | Or(l, r)        -> And(NegativeNormalForm (Not l), NegativeNormalForm (Not r))
+          | Next(p)         -> Next(NegativeNormalForm (Not p))
+          | Finally(p)      -> Finally(NegativeNormalForm (Not p))
+          | Globally(p)     -> Globally(NegativeNormalForm (Not p))
+          | Until(l, r)     -> Release(NegativeNormalForm (Not l), NegativeNormalForm (Not r))
+          | Release(l, r)   -> Until(NegativeNormalForm (Not l), NegativeNormalForm (Not r))
+          | WeakUntil(l,r)  -> failwith "Cannot use WeakUntil here. Call CleanExpression first!"
+          | Implicate(l, r) -> failwith "Cannot use Implicate here. Call CleanExpression first!"
+          | Optional(l, r) -> failwith "Cannot use Optional here. Call CleanExpression first!"
 
   let RewriteNNF formula =
     match formula with
@@ -125,7 +155,7 @@ module LinearTimeLogic =
         | Until(l, r)   -> [(Set [r], None);
                             (Set [l; Next(formula)], Some(formula))]
         | Finally(p)    -> [(Set [p], None);
-                            (Set [(Next(formula))], Some(formula))]
+                            (Set [Next(formula)], Some(formula))]
         | _ -> failwith "reduced form given"
     let (reduced, complex) = Set.partition IsReduced set
     if Set.isEmpty complex then

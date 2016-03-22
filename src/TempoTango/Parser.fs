@@ -17,8 +17,7 @@ module Parser =
   let f1 = stringReturn "false" False
   let f2 = stringReturn "⊥" False
 
-  let prop = many1Chars( noneOf " \r\n\t!XFG&|UR()∧∨¬⊥⊤T" ) |>> fun s -> Prop s
-
+  let prop = many1Chars( choice[lower;digit] ) |>> fun s -> Prop s
 
   let opp = new OperatorPrecedenceParser<expression, unit, unit>()
   let expr = opp.ExpressionParser
@@ -34,12 +33,15 @@ module Parser =
   opp.AddOperator( InfixOperator( "∨", ws, 2, Associativity.Left, fun l r -> Or( l, r ) ) )
   opp.AddOperator( InfixOperator( "U", ws, 3, Associativity.Left, fun l r -> Until( l, r ) ) )
   opp.AddOperator( InfixOperator( "R", ws, 3, Associativity.Left, fun l r -> Release( l, r ) ) )
+  opp.AddOperator( InfixOperator( "W", ws, 3, Associativity.Left, fun l r -> WeakUntil( l, r ) ) )
+  opp.AddOperator( InfixOperator( "->", ws, 3, Associativity.Left, fun l r -> Implicate( l, r ) ) )
+  opp.AddOperator( InfixOperator( "?", ws, 3, Associativity.Left, fun l r -> Optional( l, r ) ) )
 
-  opp.AddOperator( PrefixOperator("!", ws, 4, true, fun x -> Not( x ) ) )
-  opp.AddOperator( PrefixOperator("¬", ws, 4, true, fun x -> Not( x ) ) )
-  opp.AddOperator( PrefixOperator("X", ws, 4, true, fun x -> Next( x ) ) )
-  opp.AddOperator( PrefixOperator("F", ws, 4, true, fun x -> Finally( x ) ) )
-  opp.AddOperator( PrefixOperator("G", ws, 4, true, fun x -> Globally( x ) ) )
+  opp.AddOperator( PrefixOperator( "!", ws, 4, true, fun x -> Not( x ) ) )
+  opp.AddOperator( PrefixOperator( "¬", ws, 4, true, fun x -> Not( x ) ) )
+  opp.AddOperator( PrefixOperator( "X", ws, 4, true, fun x -> Next( x ) ) )
+  opp.AddOperator( PrefixOperator( "F", ws, 4, true, fun x -> Finally( x ) ) )
+  opp.AddOperator( PrefixOperator( "G", ws, 4, true, fun x -> Globally( x ) ) )
 
   let syntax = expr .>> eof
 

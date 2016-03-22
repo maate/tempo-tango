@@ -10,7 +10,8 @@ module Tests =
   [<Test>]
   let ``Test``() =
 //    System.Diagnostics.Debugger.Launch()
-    let a = Parser.Parse "G(!p|Fq)" |> NegativeNormalForm |> Set.singleton |> Automaton.ConstructAutomatonFrom
+    let nounPhrase = "art ? ( adj W noun )" // art W ( adj W noun) ... would mean that article can occur multiple times
+    let a = Parser.Parse nounPhrase |> CleanExpression |> NegativeNormalForm |> Set.singleton |> Automaton.ConstructAutomatonFrom
 //    printfn "%s" ( a.transitions.ToString() )
     let g = Automaton.ToGraph a in
     let writer = new System.IO.StringWriter()

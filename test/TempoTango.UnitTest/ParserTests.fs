@@ -20,6 +20,10 @@ module ParserTests =
     Assert.AreEqual( Parser.Parse "p ", Prop "p" )
 
   [<Test>]
+  let ``Can parse p1``() =
+    Assert.AreEqual( Parser.Parse "p1", Prop "p1" )
+
+  [<Test>]
   let ``Can parse !true``() =
     Assert.AreEqual( Parser.Parse "!true", Not( True ) )
 

@@ -46,6 +46,7 @@
     <Compile Include="SkipEpsilonTests.fs" />
     <Compile Include="MergeSigmasTests.fs" />
     <Compile Include="AlphabetTest.fs" />
+    <Compile Include="UnionTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
