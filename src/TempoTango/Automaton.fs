@@ -163,13 +163,6 @@ module Automaton =
       mergeToParallels transitions trans ) [] automaton.transitions
     { automaton with transitions = Set.ofList transitions }
 
-  let addFinals automaton =
-    let finals = Set.fold ( fun f t -> match t with
-                                         | { s = s'; t = t'; edge = Sigma( _, [] ) } when s' = t'                     -> t.s :: f
-                                         | { s = s'; t = t'; edge = Sigma( [], _ ) } when s' = set [] && t' = set []  -> t.s :: f
-                                         | _                                                                          -> f ) [] automaton.transitions
-    { automaton with finals = finals }
-
   let ConstructAutomatonFrom ltl_set =
-    ltl_set |> constructFrom |> skipEpsilons |> joinSigmas |> addFinals
+    ltl_set |> constructFrom |> skipEpsilons |> joinSigmas
 
