@@ -20,7 +20,6 @@ module Automaton =
 
   type automaton = {
     starts: state list;
-    finals: state list;
     transitions: Set<transition>;
   }
 
@@ -60,18 +59,14 @@ module Automaton =
         ) transitions conv_list
 
   let constructFrom start_state =
-    { starts = [start_state]; finals = []; transitions = FullGBA Set.empty start_state }
+    { starts = [start_state]; transitions = FullGBA Set.empty start_state }
 
   /// Returns the Graph form of the automaton
   let ToGraph automaton =
     let set_to_s = LinearTimeLogic.SetToString
     let g = (Graph.NewGraph "Automaton")
     let IsStart s = List.exists ((=) s) automaton.starts
-    let IsFinal s = List.exists ((=) s) automaton.finals
-    let addNodeFn s = (if IsStart s && IsFinal s then Graph.AddStartFinal
-                       elif IsStart s then Graph.AddStart
-                       elif IsFinal s then Graph.AddFinal
-                       else Graph.AddNode )
+    let addNodeFn s = (if IsStart s then Graph.AddStart else Graph.AddNode )
     Set.fold (fun g { edge = edge; s = s; t = t } ->
       let s_string = set_to_s s
       let t_string = set_to_s t
