@@ -45,7 +45,7 @@
     <Compile Include="FullGBATests.fs" />
     <Compile Include="SkipEpsilonTests.fs" />
     <Compile Include="MergeSigmasTests.fs" />
-    <Compile Include="DummyTest.fs" />
+    <Compile Include="AlphabetTest.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

@@ -21,6 +21,7 @@ module Automaton =
   type automaton = {
     starts: state list;
     transitions: Set<transition>;
+    alphabet: Set<string>;
   }
 
   let linkToString edge =
@@ -58,8 +59,19 @@ module Automaton =
           AddTransition trans transitions
         ) transitions conv_list
 
+  let GetAlphabet transitions =
+    Set.fold( fun a trans ->
+                match trans.edge with
+                  | Sigma( exps, _ ) -> List.fold( fun a e -> match e with
+                                                                | Prop p         -> p::a
+                                                                | Not ( Prop p ) -> p::a
+                                                                | _              -> a ) [] exps
+                  | _ -> a ) [] transitions
+
   let constructFrom start_state =
-    { starts = [start_state]; transitions = FullGBA Set.empty start_state }
+    let gba = { starts = [start_state]; alphabet = set []; transitions = FullGBA Set.empty start_state }
+    let alphabet = GetAlphabet gba.transitions |> Set.ofList
+    { gba with alphabet = alphabet }
 
   /// Returns the Graph form of the automaton
   let ToGraph automaton =
