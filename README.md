@@ -8,8 +8,8 @@ In C#:
 
 ```csharp
     var tempo = new Tempo( "art ? ( adj W noun )" );
-    var result1 = tempo.Tango( new[] { "art", "noun" } );  // true
-    var result2 = tempo.Tango( new[] { "noun", "noun" } ); // false
+    var result1 = tempo.Tango( "art", "noun" );  // true
+    var result2 = tempo.Tango( "noun", "noun" ); // false
 ```
 
 In F#:
