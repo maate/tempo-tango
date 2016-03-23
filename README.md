@@ -4,6 +4,7 @@ tempo-tango is a .NET interpreter for Linear Temporal Logic in F#.
 It is based on [this](https://github.com/tomykaira/ltl2ba) ML implementation by tomykaira
 
 ## Quick Start
+In C#:
 
 ```csharp
     var tempo = new Tempo( "art ? ( adj W noun )" );
@@ -11,6 +12,7 @@ It is based on [this](https://github.com/tomykaira/ltl2ba) ML implementation by 
     var result2 = tempo.Tango( new[] { "noun", "noun" } ); // false
 ```
 
+In F#:
 ```fsharp
     let tempo = new Tempo( "art ? ( adj W noun )" )
     let result1 = tempo.Tango [ "art"; "noun" ]  // true
