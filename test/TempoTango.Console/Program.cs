@@ -3,7 +3,7 @@
     
     private static void Main( string[] args ) {
       var tempo = new Tempo( "a & Xb" );
-      var result = tempo.Tango( new[] { "a", "b" } );
+      var result = tempo.Tango( "a", "b" );
       System.Console.WriteLine( result );
       System.Console.ReadKey();
 

@@ -27,3 +27,10 @@ type public Tempo( formula ) =
   /// </summary>
   member public this.Tango( input ) =
     a |> Automaton.Tango ( List.ofSeq input )
+
+  /// <summary>
+  ///   A list of input to verify against the Linear Temporal Logic expression provided in the
+  ///   constructor
+  /// </summary>
+  member public this.Tango( [<System.ParamArray>] input : string array ) =
+    a |> Automaton.Tango ( List.ofSeq input )
