@@ -1,6 +1,6 @@
 ﻿namespace TempoTango
 
-module LinearTimeLogic =
+module internal LinearTimeLogic =
   // Represents a linear time logic (LTL) expression
   type expression =
     | True
@@ -31,7 +31,7 @@ module LinearTimeLogic =
       | Until ( l, r )         -> Until ( CleanExpression l, CleanExpression r )
       | Release ( l, r )       -> Release ( CleanExpression l, CleanExpression r )
       | WeakUntil ( l, r )     -> Or( Until ( CleanExpression l, CleanExpression r ), Globally ( CleanExpression l ) )
-      | Implicate ( l, r )     -> Or( Not( CleanExpression l ), CleanExpression r )
+      | Implicate ( l, r )     -> Not( And( CleanExpression l, Not( CleanExpression r ) ) )
       | Optional ( l, r )      -> Or( And( CleanExpression l, Next ( CleanExpression r ) ), CleanExpression r )
 
   /// Counts the size of an expression
@@ -94,7 +94,7 @@ module LinearTimeLogic =
   /// The NNF is a positive Boolean combination of Temporal Formula.
   /// A Temporal Formula is either a literal or a formula where
   /// the outermost connective is X, U, or R.
-  let rec NegativeNormalForm formula =
+  let rec public NegativeNormalForm formula =
     match formula with
       | True | False | Prop(_) -> formula
       | And(l, r)       -> And(NegativeNormalForm l, NegativeNormalForm r)

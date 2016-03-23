@@ -1,8 +1,9 @@
 ﻿namespace TempoTango
 open LinearTimeLogic
 open Graph
+open System.Linq
 
-module Automaton =
+module internal Automaton =
 
   type edge = Epsilon of LinearTimeLogic.expression list
               | Sigma of LinearTimeLogic.expression list * LinearTimeLogic.expression list
@@ -87,7 +88,7 @@ module Automaton =
                                                                 | _              -> a ) [] exps
                   | _ -> a ) [] transitions
 
-  let constructFrom start_state =
+  let public constructFrom start_state =
     let gba = { starts = [start_state]; alphabet = set []; transitions = FullGBA Set.empty start_state }
     let alphabet = GetAlphabet gba.transitions |> Set.ofList
     { gba with alphabet = alphabet }
@@ -98,12 +99,23 @@ module Automaton =
     let g = (Graph.NewGraph "Automaton")
     let IsStart s = List.exists ((=) s) automaton.starts
     let addNodeFn s = (if IsStart s then Graph.AddStart else Graph.AddNode )
+
+    let h = new System.Collections.Generic.Dictionary<string, string>()
+    let Key s = if h.ContainsKey( s )
+                then h.[s]
+                else
+                  h.[s] <- h.Count.ToString( "X4" )
+                  h.[s]
+
     Set.fold (fun g { edge = edge; s = s; t = t } ->
       let s_string = set_to_s s
       let t_string = set_to_s t
-      let g = (addNodeFn s) g s_string
-      let g = (addNodeFn t) g t_string
-      Graph.edge g s_string t_string (linkToString edge)
+      let s_string_key = Key( s_string )
+      let t_string_key = Key( t_string )
+
+      let g = (addNodeFn s) g s_string_key
+      let g = (addNodeFn t) g t_string_key
+      Graph.edge g s_string_key t_string_key (linkToString edge)
     ) g automaton.transitions
 
   let uniquePostpones transitions =
@@ -119,7 +131,7 @@ module Automaton =
         | Sigma(c, p) -> { trans with edge = Sigma(c, p @ postpones) }
         | _ -> trans)
 
-  let skipEpsilons automaton =
+  let public skipEpsilons automaton =
     let transitions = automaton.transitions |> Set.toList
     let postpones   = uniquePostpones transitions |> Seq.toList
     let transitions = setupSigmaPostpones postpones transitions
@@ -184,11 +196,36 @@ module Automaton =
       | merge_to :: _ ->
         mergeTransitions trans merge_to :: List.filter ( fun item -> item <> merge_to) transitions 
 
-  let joinSigmas automaton =
+  let public joinSigmas automaton =
     let transitions = Set.fold ( fun transitions trans ->
       mergeToParallels transitions trans ) [] automaton.transitions
     { automaton with transitions = Set.ofList transitions }
 
-  let ConstructAutomatonFrom ltl_set =
+  let public ConstructAutomatonFrom ltl_set =
     ltl_set |> constructFrom |> skipEpsilons |> joinSigmas
 
+  let rec TangoInternal input automaton ( states : state list ) =
+    if input = [] then
+      true
+    else
+      let curInput = input.Head
+      let rec accept ( e : expression list ) =
+        e.Any( fun i -> match i with
+                          | Prop p        -> curInput = p
+                          | Not( Prop p ) -> curInput <> p
+                          | Or( l, r )    -> accept [l;r]
+                          | And( l, r )   -> accept [l] && accept [r]
+                          | _             -> failwith "expected Disjunction, Conjunction, Prop or Not Prop" )
+      let edges = automaton.transitions |> Set.filter( fun trans -> states.Contains trans.s )
+                                        |> Set.filter( fun trans -> match trans.edge with
+                                                                      | Sigma( l, r ) -> accept l
+                                                                      | _             -> true )
+
+      let nextStates = edges |> Set.map( fun item -> item.t ) |> Set.toList
+      match ( Set.toList edges ) with
+        | []         -> false
+        | head :: _  -> TangoInternal input.Tail automaton nextStates
+      // TODO: Accepting states
+
+  let Tango input automaton =
+    TangoInternal input automaton automaton.starts

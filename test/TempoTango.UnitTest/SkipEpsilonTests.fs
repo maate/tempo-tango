@@ -10,14 +10,14 @@ open TempoTango.Parser
 ///               G(!p|Fq)
 /// corresponds to /doc/reduced-gba.png
 module SkipEpsilonTests =
-  let ϕ = Parser.Parse "G(!p|Fq)"
+  let private ϕ = Parser.Parse "G(!p|Fq)"
 
-  let fullGba = ϕ |> NegativeNormalForm |> Set.singleton |> Automaton.constructFrom
-  let reducedGba = fullGba |> Automaton.skipEpsilons
+  let private fullGba = ϕ |> NegativeNormalForm |> Set.singleton |> Automaton.constructFrom
+  let private reducedGba = fullGba |> Automaton.skipEpsilons
 
-  let transitions = reducedGba.transitions |> Set.map ( fun trans -> trans.edge, trans.s, trans.t )
+  let private transitions = reducedGba.transitions |> Set.map ( fun trans -> trans.edge, trans.s, trans.t )
 
-  let Σ = Sigma([],[])
+  let private Σ = Sigma([],[])
 
   [<Test>]
   let ``Start state is equal to input: G(!p|Fq)``() =

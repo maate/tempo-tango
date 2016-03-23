@@ -1,9 +1,9 @@
-﻿namespace TempoTango.Parser
+﻿namespace TempoTango
 
 open FParsec
 open TempoTango.LinearTimeLogic
 
-module Parser =
+module internal Parser =
 
   let test p str =
     match run p str with
@@ -45,9 +45,9 @@ module Parser =
 
   let syntax = expr .>> eof
 
-  let Parse str = match run syntax str with
-                    | Success( result, _, _ ) -> result
-                    | Failure( err, _, _ ) -> failwith err
+  let public Parse str = match run syntax str with
+                           | Success( result, _, _ ) -> result
+                           | Failure( err, _, _ ) -> failwith err
 
   let PrintParse str =
       test syntax str

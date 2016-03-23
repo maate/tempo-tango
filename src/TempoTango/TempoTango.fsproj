@@ -55,6 +55,8 @@
     <Compile Include="Parser.fs" />
     <None Include="Script.fsx" />
     <None Include="packages.config" />
+    <Compile Include="Tempo.fs" />
+    <Compile Include="AssemblyInfo.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

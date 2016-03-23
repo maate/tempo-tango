@@ -10,15 +10,15 @@ open TempoTango.Parser
 ///               G(!p|Fq)
 /// corresponds to /doc/minified-gba.png
 module MergedSigmasTests =
-  let ϕ = Parser.Parse "G(!p|Fq)"
+  let private ϕ = Parser.Parse "G(!p|Fq)"
 
-  let fullGba = ϕ |> NegativeNormalForm |> Set.singleton |> Automaton.constructFrom
-  let reducedGba = fullGba |> Automaton.skipEpsilons
-  let minifiedGba = reducedGba |> Automaton.joinSigmas
+  let private fullGba = ϕ |> NegativeNormalForm |> Set.singleton |> Automaton.constructFrom
+  let private reducedGba = fullGba |> Automaton.skipEpsilons
+  let private minifiedGba = reducedGba |> Automaton.joinSigmas
 
-  let transitions = minifiedGba.transitions |> Set.map ( fun trans -> trans.edge, trans.s, trans.t )
+  let private transitions = minifiedGba.transitions |> Set.map ( fun trans -> trans.edge, trans.s, trans.t )
 
-  let Σ = Sigma([],[])
+  let private Σ = Sigma([],[])
 
   [<Test>]
   let ``Start state is equal to input: G(!p|Fq)``() =

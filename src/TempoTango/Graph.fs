@@ -1,6 +1,6 @@
 ﻿namespace TempoTango
 
-module Graph =
+module internal Graph =
 
   type shape = DoubleCircle | Circle
   type graph_kind = DiGraph | Graph
@@ -83,3 +83,13 @@ module Graph =
     PrintNodes out nodes;
     PrintEdges out edges;
     fprintf out "}"
+
+  let ShowGraph s =
+    System.IO.File.WriteAllText( "tmp.dot", s )
+    let pi = new System.Diagnostics.ProcessStartInfo( @"contrib\graphviz-2.38\dot.exe", "-T png -o tmp.png tmp.dot" )
+    pi.CreateNoWindow <- true
+    pi.UseShellExecute <- false
+    let p = System.Diagnostics.Process.Start( pi )
+    p.WaitForExit()
+    System.Diagnostics.Process.Start( "tmp.png ")
+    |> ignore

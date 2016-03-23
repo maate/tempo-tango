@@ -10,13 +10,13 @@ open TempoTango.Parser
 ///               G(!p|Fq)
 /// corresponds to /doc/gba.png
 module FullGBATests = 
-  let ϕ = Parser.Parse "G(!p|Fq)"
+  let private ϕ = Parser.Parse "G(!p|Fq)"
 
-  let gba = ϕ |> NegativeNormalForm |> Set.singleton |> Automaton.constructFrom
+  let private gba = ϕ |> NegativeNormalForm |> Set.singleton |> Automaton.constructFrom
 
-  let transitions = gba.transitions |> Set.map ( fun trans -> trans.edge, trans.s, trans.t )
+  let private transitions = gba.transitions |> Set.map ( fun trans -> trans.edge, trans.s, trans.t )
 
-  let ε = Epsilon([])
+  let private ε = Epsilon([])
 
   [<Test>]
   let ``Start state is equal to input: G(!p|Fq)``() =

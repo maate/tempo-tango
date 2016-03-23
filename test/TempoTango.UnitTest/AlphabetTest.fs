@@ -7,7 +7,7 @@ open TempoTango.LinearTimeLogic
 open TempoTango.Parser
 
 module AlphabetTest =
-  let parse s = Parser.Parse s |> NegativeNormalForm |> Set.singleton |> Automaton.ConstructAutomatonFrom
+  let private parse s = Parser.Parse s |> NegativeNormalForm |> Set.singleton |> Automaton.ConstructAutomatonFrom
 
   [<Test>]
   let ``Automaton p&q has Σ: ['p', 'q']``() =
