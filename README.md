@@ -19,6 +19,12 @@ In F#:
     let result2 = tempo.Tango [ "noun"; "noun" ] // false
 ```
 
+The expression `art ? ( adj W noun )` is converted to this automaton:
+
+![GBA](/docs/np-example.png)
+
+The input expression is then checked against the automaton. This check is currently not done particularly intelligently.
+
 ## Supported Operators
 
 Proposition names are written in alphanumeric lowercase.
