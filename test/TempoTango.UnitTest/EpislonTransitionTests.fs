@@ -1,8 +1,8 @@
-﻿namespace TempoTango.UnitTest
+﻿namespace M8.TempoTango.UnitTest
 
 open NUnit.Framework
-open TempoTango
-open TempoTango.LinearTimeLogic
+open M8.TempoTango
+open M8.TempoTango.LinearTimeLogic
 
 [<TestFixture>]
 module EpsilonTransitionTests =

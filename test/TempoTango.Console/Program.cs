@@ -1,4 +1,6 @@
-﻿namespace TempoTango.Console {
+﻿using M8.TempoTango;
+
+namespace TempoTango.Console {
   internal class Program {
     
     private static void Main( string[] args ) {

@@ -1,4 +1,4 @@
-﻿namespace TempoTango
+﻿namespace M8.TempoTango
 
 module internal Graph =
 

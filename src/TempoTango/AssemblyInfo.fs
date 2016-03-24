@@ -2,5 +2,5 @@
 
 open System.Runtime.CompilerServices
 
-[<assembly: InternalsVisibleTo("TempoTango.UnitTest")>]
+[<assembly: InternalsVisibleTo( "M8.TempoTango.UnitTest" )>]
 do()

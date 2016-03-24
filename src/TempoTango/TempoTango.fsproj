@@ -53,7 +53,6 @@
     <Compile Include="Graph.fs" />
     <Compile Include="Automaton.fs" />
     <Compile Include="Parser.fs" />
-    <None Include="Script.fsx" />
     <None Include="packages.config" />
     <Compile Include="Tempo.fs" />
     <Compile Include="AssemblyInfo.fs" />

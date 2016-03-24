@@ -1,6 +1,7 @@
-﻿namespace TempoTango
-open LinearTimeLogic
-open Graph
+﻿namespace M8.TempoTango
+
+open M8.TempoTango.LinearTimeLogic
+open M8.TempoTango.Graph
 open System.Linq
 
 module internal Automaton =

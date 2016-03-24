@@ -1,10 +1,10 @@
-﻿namespace TempoTango.UnitTest
+﻿namespace M8.TempoTango.UnitTest
 
 open NUnit.Framework
-open TempoTango
-open TempoTango.Automaton
-open TempoTango.LinearTimeLogic
-open TempoTango.Parser
+open M8.TempoTango
+open M8.TempoTango.Automaton
+open M8.TempoTango.LinearTimeLogic
+open M8.TempoTango.Parser
 
 module SimpleTangoTests =
   let private parse s = Parser.Parse s |> CleanExpression |> NegativeNormalForm |> Set.singleton |> Automaton.ConstructAutomatonFrom

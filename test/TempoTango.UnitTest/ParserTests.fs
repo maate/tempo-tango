@@ -1,9 +1,9 @@
-﻿namespace TempoTango.UnitTest
+﻿namespace M8.TempoTango.UnitTest
 
 open NUnit.Framework
-open TempoTango
-open TempoTango.LinearTimeLogic
-open TempoTango.Parser
+open M8.TempoTango
+open M8.TempoTango.LinearTimeLogic
+open M8.TempoTango.Parser
 
 [<TestFixture>]
 module ParserTests =

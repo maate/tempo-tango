@@ -8,7 +8,7 @@
     <ProjectGuid>63f8babe-a0ea-4af0-abdf-a62b6378a46d</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>TempoTango.UnitTest</RootNamespace>
-    <AssemblyName>TempoTango.UnitTest</AssemblyName>
+    <AssemblyName>M8.TempoTango.UnitTest</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>TempoTango.UnitTest</Name>
   </PropertyGroup>
