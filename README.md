@@ -47,6 +47,7 @@ The following operators are supported.
 Operator   Alternatives   Meaning
 T          true           True
 F          false,⊥        False
+E          ε              Empty string
 !          ¬              Not
 X                         Next
 F                         Finally
