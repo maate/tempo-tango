@@ -1,6 +1,6 @@
 ﻿namespace M8.TempoTango
 
-module internal LinearTimeLogic =
+module internal LinearTemporalLogic =
   // Represents a linear time logic (LTL) expression
   type expression =
     | True
@@ -90,7 +90,7 @@ module internal LinearTimeLogic =
         | True            -> "T"
         | False           -> "F"
         | Prop(p)         -> p
-        | Not(exp)        -> "!" + (print_paren exp)
+        | Not(exp)        -> "¬" + (print_paren exp)
         | And(l, r)       -> (print_paren l) + " & " + (print_paren r)
         | Or(l, r)        -> (print_paren l) + " | " + (print_paren r)
         | Next(exp)       -> "X " + (print_paren exp)

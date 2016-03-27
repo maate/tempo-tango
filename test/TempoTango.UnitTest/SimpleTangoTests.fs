@@ -3,7 +3,7 @@
 open NUnit.Framework
 open M8.TempoTango
 open M8.TempoTango.Automaton
-open M8.TempoTango.LinearTimeLogic
+open M8.TempoTango.LinearTemporalLogic
 open M8.TempoTango.Parser
 
 module SimpleTangoTests =
@@ -40,6 +40,7 @@ module SimpleTangoTests =
     let tempo = new Tempo( "art ? ( adj W noun )" )
 
     let input = [ "art" ]
+
     Assert.IsTrue( tempo.Tango input )
 
     let input = [ "adj" ]

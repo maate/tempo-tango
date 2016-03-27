@@ -1,7 +1,7 @@
 ﻿namespace M8.TempoTango
 
 open FParsec
-open M8.TempoTango.LinearTimeLogic
+open M8.TempoTango.LinearTemporalLogic
 
 module internal Parser =
 

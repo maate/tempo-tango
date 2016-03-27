@@ -2,7 +2,7 @@
 
 open NUnit.Framework
 open M8.TempoTango
-open M8.TempoTango.LinearTimeLogic
+open M8.TempoTango.LinearTemporalLogic
 open M8.TempoTango.Parser
 
 [<TestFixture>]
@@ -21,12 +21,12 @@ module Tests =
 
     let s = "art & adj W noun"
 //    "prep? art?";
-    let a = Parser.Parse "art -> ( X ( adj U noun ) )" |> CleanExpression |> NegativeNormalForm |> Set.singleton |> Automaton.ConstructAutomatonFrom
+    let a = Parser.Parse "G F p ∧ F(q ∧ G ¬ r)" |> CleanExpression |> NegativeNormalForm |> Set.singleton |> Automaton.ConstructAutomatonFrom
 //    printfn "%s" ( a.transitions.ToString() )
     let g = Automaton.ToGraph a
 
     let writer = new System.IO.StringWriter()
     Graph.PrintGraph writer g;
 
-//    Graph.ShowGraph ( writer.ToString() )
+    Graph.ShowGraph ( writer.ToString() )
     writer.Close()

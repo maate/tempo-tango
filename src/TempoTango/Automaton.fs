@@ -1,13 +1,13 @@
 ﻿namespace M8.TempoTango
 
-open M8.TempoTango.LinearTimeLogic
+open M8.TempoTango.LinearTemporalLogic
 open M8.TempoTango.Graph
 open System.Linq
 
 module internal Automaton =
 
-  type edge = Epsilon of LinearTimeLogic.expression list
-              | Sigma of LinearTimeLogic.expression list * LinearTimeLogic.expression list
+  type edge = Epsilon of expression list
+              | Sigma of expression list * expression list
   type state = Set<expression>
   type transition = {
     edge : edge;
@@ -28,13 +28,13 @@ module internal Automaton =
 
   let linkToString edge =
     let format_conds conds =
-      String.concat " ∧ " (List.map LinearTimeLogic.ToString conds)
+      String.concat " & " (List.map LinearTemporalLogic.ToString conds)
     match edge with
-    | Epsilon(postpones)       -> "ε" + (String.concat "" (List.map (fun f -> ", !" + (LinearTimeLogic.ToString(f))) postpones))
-    | Sigma(conds, postpones)  -> "Σ" + (format_conds conds) + (String.concat "" (List.map (fun f -> ", " + (LinearTimeLogic.ToString(f))) postpones))
+    | Epsilon(postpones)       -> "ε" + (String.concat "" (List.map (fun f -> ", !" + (LinearTemporalLogic.ToString(f))) postpones))
+    | Sigma(conds, postpones)  -> "Σ" + (format_conds conds) + (String.concat "" (List.map (fun f -> ", " + (LinearTemporalLogic.ToString(f))) postpones))
 
   let TransitionToString { edge = edge; s = s; t = t } =
-    Printf.sprintf "%s -> %s (%s)" (LinearTimeLogic.SetToString s) (LinearTimeLogic.SetToString t) (linkToString edge)
+    Printf.sprintf "%s -> %s (%s)" (LinearTemporalLogic.SetToString s) (LinearTemporalLogic.SetToString t) (linkToString edge)
 
   let rec FullGBA transitions ( state : Set<expression> ) =
     let isKnown trans transitions =
@@ -50,9 +50,9 @@ module internal Automaton =
       | None    -> Epsilon([])
       | Some(p) -> Epsilon([p])
 
-    match LinearTimeLogic.EpislonTransition state with
+    match EpislonTransition state with
       | None ->
-        let (conds, next) = LinearTimeLogic.SigmaTransform ( state )
+        let (conds, next) = SigmaTransform ( state )
         let trans = { edge = Sigma(conds, []); s = state; t = next }
         AddTransition trans transitions
       | Some(conv_list) ->
@@ -83,7 +83,7 @@ module internal Automaton =
   let GetAlphabet transitions =
     Set.fold( fun a trans ->
                 match trans.edge with
-                  | Sigma( exps, _ ) -> List.fold( LinearTimeLogic.FindProps ) a exps
+                  | Sigma( exps, _ ) -> List.fold( FindProps ) a exps
                   | _ -> a ) [] transitions
 
   let public constructFrom start_state =
@@ -93,7 +93,7 @@ module internal Automaton =
 
   /// Returns the Graph form of the automaton
   let ToGraph automaton =
-    let set_to_s = LinearTimeLogic.SetToString
+    let set_to_s = SetToString
     let g = (Graph.NewGraph "Automaton")
     let IsStart s = List.exists ((=) s) automaton.starts
     let addNodeFn s = (if IsStart s then Graph.AddStart else Graph.AddNode )
@@ -180,8 +180,8 @@ module internal Automaton =
         | (Epsilon(_), Epsilon(_)) -> l.edge
         | (Sigma(l_cond, ps), Sigma(r_cond, _)) ->
         begin
-          match LinearTimeLogic.CalculateOr (LinearTimeLogic.AndConcat l_cond) (LinearTimeLogic.AndConcat r_cond) with
-            | LinearTimeLogic.True -> Sigma([], ps)
+          match CalculateOr (AndConcat l_cond) (AndConcat r_cond) with
+            | True -> Sigma([], ps)
             | prop -> Sigma([prop], ps)
         end
         | _ -> failwith (Printf.sprintf "Unable to merge %s with %s" (linkToString l.edge) (linkToString r.edge))

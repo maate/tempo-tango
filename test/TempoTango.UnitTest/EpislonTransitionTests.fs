@@ -2,7 +2,7 @@
 
 open NUnit.Framework
 open M8.TempoTango
-open M8.TempoTango.LinearTimeLogic
+open M8.TempoTango.LinearTemporalLogic
 
 [<TestFixture>]
 module EpsilonTransitionTests =
