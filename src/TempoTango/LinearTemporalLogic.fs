@@ -34,6 +34,22 @@ module internal LinearTimeLogic =
       | Implicate ( l, r )     -> Not( And( CleanExpression l, Not( CleanExpression r ) ) )
       | Optional ( l, r )      -> Or( And( CleanExpression l, Next ( CleanExpression r ) ), CleanExpression r )
 
+  let rec FindProps a e =
+      match e with
+        | True | False   -> a
+        | Prop p         -> p::a
+        | Not p
+        | Next p
+        | Finally p
+        | Globally p     -> ( FindProps [] p ) @ a
+        | Until( l, r )
+        | Release( l, r )
+        | WeakUntil( l, r )
+        | Implicate( l, r )
+        | Optional( l, r )
+        | Or( l, r )
+        | And( l, r )    -> ( FindProps [] l ) @ ( FindProps [] r ) @ a
+
   /// Counts the size of an expression
   let rec sizeOf exp =
     match exp with

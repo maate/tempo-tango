@@ -83,10 +83,7 @@ module internal Automaton =
   let GetAlphabet transitions =
     Set.fold( fun a trans ->
                 match trans.edge with
-                  | Sigma( exps, _ ) -> List.fold( fun a e -> match e with
-                                                                | Prop p         -> p::a
-                                                                | Not ( Prop p ) -> p::a
-                                                                | _              -> a ) [] exps
+                  | Sigma( exps, _ ) -> List.fold( LinearTimeLogic.FindProps ) a exps
                   | _ -> a ) [] transitions
 
   let public constructFrom start_state =
