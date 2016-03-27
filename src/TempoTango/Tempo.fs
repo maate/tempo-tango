@@ -34,3 +34,10 @@ type public Tempo( formula ) =
   /// </summary>
   member public this.Tango( [<System.ParamArray>] input : string array ) =
     a |> Automaton.Tango ( List.ofSeq input )
+
+  /// <summary>
+  ///   True if <param name="symbol"></param> is a part of the alphabet of the formula.
+  ///   False otherwise.
+  /// </summary>
+  member public this.TangosWith( symbol ) =
+    a.alphabet.Contains( symbol )

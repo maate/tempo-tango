@@ -8,22 +8,34 @@ In C#:
 
 ```csharp
     var tempo = new Tempo( "art ? ( adj W noun )" );
-    var result1 = tempo.Tango( "art", "noun" );  // true
-    var result2 = tempo.Tango( "noun", "noun" ); // false
+
+    tempo.Tango( "art", "noun" );  // true
+    tempo.Tango( "noun", "noun" ); // false
+
+    tempo.TangosWith( "art" )      // true
+    tempo.TangosWith( "adj" )      // true
+    tempo.TangosWith( "noun" )     // true
+    tempo.TangosWith( "verb" )     // false
 ```
 
 In F#:
 ```fsharp
     let tempo = new Tempo( "art ? ( adj W noun )" )
-    let result1 = tempo.Tango [ "art"; "noun" ]  // true
-    let result2 = tempo.Tango [ "noun"; "noun" ] // false
+
+    tempo.Tango [ "art"; "noun" ]  // true
+    tempo.Tango [ "noun"; "noun" ] // false
+    
+    tempo.TangosWith "art"         // true
+    tempo.TangosWith "adj"         // true
+    tempo.TangosWith "noun"        // true
+    tempo.TangosWith "verb"        // false
 ```
 
-The expression `art ? ( adj W noun )` is converted to this automaton:
+Internally, the expression `art ? ( adj W noun )` is converted to this automaton:
 
 ![GBA](/docs/np-example.png)
 
-The input expression is then checked against the automaton. This check is currently not done particularly intelligently.
+The input symbols is then checked against the automaton. The symbols are evaluated as a run in the automaton.
 
 ## Supported Operators
 
