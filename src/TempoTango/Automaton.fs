@@ -206,10 +206,34 @@ module internal Automaton =
   let public ConstructAutomatonFrom ltl_set =
     ltl_set |> constructFrom |> skipEpsilons |> joinSigmas
 
-  let rec TangoInternal ( input : string list list ) automaton ( states : state list ) =
+  let rec IsFinal automaton ( states : state list ) =
+    let transitions = automaton.transitions |> Set.filter( fun trans -> states.Contains trans.s )
+
+    let rec hasEmpty ( e : expression list ) =
+      e.All( fun i -> match i with
+                          | Empty         -> true
+                          | Not Empty     -> false
+                          | Prop p
+                          | Not( Prop p ) -> false
+                          | Or( l, r )    -> hasEmpty [l] || hasEmpty [r]
+                          | And( l, r )   -> hasEmpty [l] && hasEmpty [r]
+                          | _             -> failwith "expected Disjunction, Conjunction, Empty, Prop or Not Prop" )
+
+    let emptyTransitions = Set.filter( fun trans -> match trans.edge with
+                                                      | Sigma( l, _ ) when l.Any() -> hasEmpty l
+                                                      | Sigma( l, _ ) when l = []  -> true
+                                                      | _                          -> false )
+
+    let epsilonTransitions = transitions |> emptyTransitions
+                                         |> Set.map( fun trans -> trans.t )
+                                         |> Set.toList
+
+    transitions.Any( fun trans -> states.Any( fun s -> s = trans.t ) ) || epsilonTransitions.Any() && IsFinal automaton epsilonTransitions
+
+  let rec TangoInternal input automaton ( nextStates : state list ) =
 
     if input = [] then
-      true
+      IsFinal automaton nextStates
     else
       let curInput = input.Head
       let rec accept ( e : expression list ) =
@@ -222,13 +246,15 @@ module internal Automaton =
                           | And( l, r )   -> accept [l] && accept [r]
                           | _             -> failwith "expected Disjunction, Conjunction, Empty, Prop or Not Prop" )
 
-      let edges = automaton.transitions |> Set.filter( fun trans -> states.Contains trans.s )
-                                        |> Set.filter( fun trans -> match trans.edge with
-                                                                      | Sigma( l, r ) -> accept l
-                                                                      | _             -> true )
+      let findTransitions ( nextStates : state list ) = automaton.transitions |> Set.filter( fun trans -> nextStates.Contains trans.s )
+                                                                              |> Set.filter( fun trans -> match trans.edge with
+                                                                                                            | Sigma( l, r ) -> accept l
+                                                                                                            | _             -> true )
 
-      let nextStates = edges |> Set.map( fun item -> item.t ) |> Set.toList
-      match ( Set.toList edges ) with
+      let transitions = findTransitions nextStates
+
+      let nextStates = transitions |> Set.map( fun item -> item.t ) |> Set.toList
+      match ( Set.toList transitions ) with
         | []         -> false
         | head :: _  -> TangoInternal input.Tail automaton nextStates
       // TODO: Accepting states

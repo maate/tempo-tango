@@ -30,7 +30,7 @@ module SimpleTangoTests =
     Assert.IsTrue( a |> Tango input )
 
     let input = [ [ "a" ] ]
-    Assert.IsTrue( a |> Tango input )
+    Assert.IsFalse( a |> Tango input )
 
     let input = [ [ "a" ]; [ "c" ] ]
     Assert.IsFalse( a |> Tango input )
