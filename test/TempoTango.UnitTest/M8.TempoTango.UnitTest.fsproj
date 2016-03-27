@@ -47,6 +47,7 @@
     <Compile Include="MergeSigmasTests.fs" />
     <Compile Include="AlphabetTest.fs" />
     <Compile Include="SimpleTangoTests.fs" />
+    <Compile Include="EmptyString.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

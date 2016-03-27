@@ -21,7 +21,7 @@ module Tests =
 
     let s = "art ? ( adj W noun )"
 //    "prep? art?";
-    let a = Parser.Parse s |> CleanExpression |> NegativeNormalForm |> Set.singleton |> Automaton.ConstructAutomatonFrom
+    let a = Parser.Parse "art ? ( adj W ( noun ? GE ) )" |> CleanExpression |> NegativeNormalForm |> Set.singleton |> Automaton.ConstructAutomatonFrom
 //    printfn "%s" ( a.transitions.ToString() )
     let g = Automaton.ToGraph a true
 

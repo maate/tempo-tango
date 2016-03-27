@@ -5,6 +5,7 @@ module internal LinearTemporalLogic =
   type expression =
     | True
     | False
+    | Empty
     | Prop       of string
     | Not        of expression
     | And        of expression * expression
@@ -21,7 +22,8 @@ module internal LinearTemporalLogic =
 
   let rec CleanExpression exp =
     match exp with
-      | True | False | Prop(_) -> exp
+      | True | False | Empty
+      | Prop(_)                -> exp
       | Not p                  -> Not ( CleanExpression p )
       | And ( l, r )           -> And ( CleanExpression l, CleanExpression r )
       | Or ( l, r )            -> Or ( CleanExpression l, CleanExpression r )
@@ -34,39 +36,42 @@ module internal LinearTemporalLogic =
       | Implicate ( l, r )     -> Not( And( CleanExpression l, Not( CleanExpression r ) ) )
       | Optional ( l, r )      -> Or( And( CleanExpression l, Next ( CleanExpression r ) ), CleanExpression r )
 
-  let rec FindProps a e =
-      match e with
-        | True | False   -> a
-        | Prop p         -> p::a
+  /// Returns the leaf nodes in the expression
+  let rec FindProps alphabet expression =
+      match expression with
+        | True | False   -> alphabet
+        | Empty          -> "E"::alphabet
+        | Prop p         -> p::alphabet
         | Not p
         | Next p
         | Finally p
-        | Globally p     -> ( FindProps [] p ) @ a
+        | Globally p     -> ( FindProps [] p ) @ alphabet
         | Until( l, r )
         | Release( l, r )
         | WeakUntil( l, r )
         | Implicate( l, r )
         | Optional( l, r )
         | Or( l, r )
-        | And( l, r )    -> ( FindProps [] l ) @ ( FindProps [] r ) @ a
+        | And( l, r )    -> ( FindProps [] l ) @ ( FindProps [] r ) @ alphabet
 
   /// Counts the size of an expression
   let rec sizeOf exp =
     match exp with
+      | Empty            -> 0
       | True
       | False
-      | Prop(_) -> 1
+      | Prop(_)          -> 1
       | Not(exp)
       | Next(exp)
       | Finally(exp)
-      | Globally(exp)  -> 1 + sizeOf exp
+      | Globally(exp)    -> 1 + sizeOf exp
       | And(l, r)
       | Or(l, r)
       | Until(l, r)
       | Release(l, r)    -> 1 + max ( sizeOf l ) ( sizeOf r )
       | WeakUntil(l, r)  -> failwith "Cannot use WeakUntil here. Call CleanExpression first!"
       | Implicate(l, r)  -> failwith "Cannot use Implicate here. Call CleanExpression first!"
-      | Optional(l, r) -> failwith "Cannot use Optional here. Call CleanExpression first!"
+      | Optional(l, r)   -> failwith "Cannot use Optional here. Call CleanExpression first!"
 
   /// Removes the largest item from a set.
   /// Returns a tuple of the removed item and the new set.
@@ -89,6 +94,7 @@ module internal LinearTemporalLogic =
       match exp with
         | True            -> "T"
         | False           -> "F"
+        | Empty           -> "E"
         | Prop(p)         -> p
         | Not(exp)        -> "¬" + (print_paren exp)
         | And(l, r)       -> (print_paren l) + " & " + (print_paren r)
@@ -100,7 +106,7 @@ module internal LinearTemporalLogic =
         | WeakUntil(l, r) -> failwith "Cannot use WeakUntil here. Call CleanExpression first!"
         | Release(l, r)   -> (print_paren l) + " R " + (print_paren r)
         | Implicate(l, r) -> failwith "Cannot use Implicate here. Call CleanExpression first!"
-        | Optional(l, r) -> failwith "Cannot use Optional here. Call CleanExpression first!"
+        | Optional(l, r)  -> failwith "Cannot use Optional here. Call CleanExpression first!"
 
   let rec SetToString set =
     let string_formulae = Set.map ( fun item -> ToString item )
@@ -112,7 +118,8 @@ module internal LinearTemporalLogic =
   /// the outermost connective is X, U, or R.
   let rec public NegativeNormalForm formula =
     match formula with
-      | True | False | Prop(_) -> formula
+      | True | False
+      | Empty | Prop(_) -> formula
       | And(l, r)       -> And(NegativeNormalForm l, NegativeNormalForm r)
       | Or(l, r)        -> Or(NegativeNormalForm l, NegativeNormalForm r)
       | Next(p)         -> Next(NegativeNormalForm p)
@@ -127,6 +134,7 @@ module internal LinearTemporalLogic =
         match formula with
           | True            -> False
           | False           -> True
+          | Empty           -> Not(formula)
           | Prop(_)         -> Not(formula)
           | Not(p)          -> NegativeNormalForm p
           | And(l, r)       -> Or(NegativeNormalForm (Not l), NegativeNormalForm (Not r))
@@ -151,10 +159,12 @@ module internal LinearTemporalLogic =
     | _ -> true
 
   let IsReduced = function
-    | True         -> true
-    | False        -> true
-    | Prop(_)      -> true
-    | Not(Prop(_)) -> true
+    | True
+    | False
+    | Empty
+    | Prop(_)
+    | Not Empty
+    | Not( Prop(_) )
     | Next(_)      -> true
     | _            -> false
 
@@ -186,15 +196,14 @@ module internal LinearTemporalLogic =
   /// input set should be reduced and consistent
   let SigmaTransform set =
     Set.fold (fun (conds, next) -> function
-      | True    -> (conds, next)
-      | False -> failwith "inconsistent False"
-      | Prop(p) ->
-        (Prop(p) :: conds, next)
-      | Not(Prop(p)) ->
-        (Not(Prop(p)) :: conds, next)
-      | Next(x) ->
-        (conds, Set.add x next)
-      | other -> failwith ("not reduced " + ToString other)) ([], Set.empty) set
+      | Not Empty    -> ((Not Empty)::conds, next)
+      | Empty        -> (Empty::conds, next)
+      | True         -> (conds, next)
+      | False        -> failwith "inconsistent False"
+      | Prop(p)      -> (Prop(p) :: conds, next)
+      | Not(Prop(p)) -> (Not(Prop(p)) :: conds, next)
+      | Next(x)      -> (conds, Set.add x next)
+      | other        -> failwith ("not reduced " + ToString other)) ([], Set.empty) set
 
   /// prop is simple NNF. prop1 < prop2
   let CalculateOr prop1 prop2 =

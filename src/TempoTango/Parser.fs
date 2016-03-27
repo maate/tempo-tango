@@ -19,12 +19,15 @@ module internal Parser =
 
   let prop = many1Chars( choice[lower;digit] ) |>> fun s -> Prop s
 
+  let empty1 = stringReturn "E" Empty
+  let empty2 = stringReturn "ε" Empty
+
   let opp = new OperatorPrecedenceParser<expression, unit, unit>()
   let expr = opp.ExpressionParser
 
   let ws = spaces
   let str_ws s = ws >>. pstring s .>> ws
-  let primitive = choice[t1; t2; t3; f1; f2; prop] <|> between (str_ws "(") (str_ws ")") expr
+  let primitive = choice[t1; t2; t3; f1; f2; empty1; empty2; prop] <|> between (str_ws "(") (str_ws ")") expr
   opp.TermParser <- ws >>. primitive .>> ws
 
   opp.AddOperator( InfixOperator( "&", ws, 1, Associativity.Left, fun l r -> And( l, r ) ) )

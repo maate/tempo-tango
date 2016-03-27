@@ -13,31 +13,55 @@ module SimpleTangoTests =
   let ``Disjunction``() =
     let a = parse "a | b"
 
-    let input = [ "a" ]
+    let input = [ [ "a" ] ]
     Assert.IsTrue( a |> Tango input )
 
-    let input = [ "b" ]
+    let input = [ [ "b" ] ]
     Assert.IsTrue( a |> Tango input )
 
-    let input = [ "c" ]
+    let input = [ [ "c" ] ]
     Assert.IsFalse( a |> Tango input )
 
 
   [<Test>]
   let ``Conjunction using Next``() =
     let a = parse "a & Xb"
-    let input = [ "a"; "b" ]
+    let input = [ [ "a" ]; [ "b" ] ]
     Assert.IsTrue( a |> Tango input )
 
-    let input = [ "a" ]
+    let input = [ [ "a" ] ]
     Assert.IsTrue( a |> Tango input )
 
-    let input = [ "a"; "c" ]
+    let input = [ [ "a" ]; [ "c" ] ]
     Assert.IsFalse( a |> Tango input )
 
   [<Test>]
+  let ``Conjunction``() =
+    let a = parse "a & b"
+
+    let input = [ [ "a"; "b" ] ]
+    Assert.IsTrue( a |> Tango input )
+
+    let input = [ [ "a" ]; [ "b" ] ]
+    Assert.IsFalse( a |> Tango input )
+
+    let input = [ [ "a" ] ]
+    Assert.IsFalse( a |> Tango input )
+
+    let input = [ [ "a" ]; [ "c" ] ]
+    Assert.IsFalse( a |> Tango input )
+
+  [<Test>]
+  let ``Future Something``() =
+    let tempo = new Tempo( "Xb" )
+
+    let input = [ "a"; "b" ]
+    Assert.IsTrue( tempo.Tango input )
+
+  [<Test>]
   let ``noun phrase``() =
-    let tempo = new Tempo( "art ? ( adj W noun )" )
+//    let tempo = new Tempo( "art ? ( adj W noun )" ) - warning: this will accept noun noun
+    let tempo = new Tempo( "art ? ( adj W ( noun ? GE ) )" )
 
     let input = [ "art" ]
 

@@ -206,18 +206,22 @@ module internal Automaton =
   let public ConstructAutomatonFrom ltl_set =
     ltl_set |> constructFrom |> skipEpsilons |> joinSigmas
 
-  let rec TangoInternal input automaton ( states : state list ) =
+  let rec TangoInternal ( input : string list list ) automaton ( states : state list ) =
+
     if input = [] then
       true
     else
       let curInput = input.Head
       let rec accept ( e : expression list ) =
-        e.Any( fun i -> match i with
-                          | Prop p        -> curInput = p
-                          | Not( Prop p ) -> curInput <> p
-                          | Or( l, r )    -> accept [l;r]
+        e.All( fun i -> match i with
+                          | Empty         -> curInput = []
+                          | Not Empty     -> curInput.Any()
+                          | Prop p        -> curInput.Contains p
+                          | Not( Prop p ) -> not ( curInput.Contains p )
+                          | Or( l, r )    -> accept [l] || accept [r]
                           | And( l, r )   -> accept [l] && accept [r]
-                          | _             -> failwith "expected Disjunction, Conjunction, Prop or Not Prop" )
+                          | _             -> failwith "expected Disjunction, Conjunction, Empty, Prop or Not Prop" )
+
       let edges = automaton.transitions |> Set.filter( fun trans -> states.Contains trans.s )
                                         |> Set.filter( fun trans -> match trans.edge with
                                                                       | Sigma( l, r ) -> accept l

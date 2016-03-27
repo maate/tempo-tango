@@ -16,6 +16,11 @@ module ParserTests =
     Assert.AreEqual( Parser.Parse "⊤", True )
 
   [<Test>]
+  let ``Can parse empty string``() =
+    Assert.AreEqual( Parser.Parse "E", Empty )
+    Assert.AreEqual( Parser.Parse "ε", Empty )
+
+  [<Test>]
   let ``Can parse p``() =
     Assert.AreEqual( Parser.Parse "p ", Prop "p" )
 

@@ -26,14 +26,16 @@ type public Tempo( formula ) =
   ///   constructor
   /// </summary>
   member public this.Tango( input ) =
-    a |> Automaton.Tango ( List.ofSeq input )
+    let mapped = input |> List.map( fun item -> [item] )
+    a |> Automaton.Tango ( List.ofSeq mapped )
 
   /// <summary>
   ///   A list of input to verify against the Linear Temporal Logic expression provided in the
   ///   constructor
   /// </summary>
   member public this.Tango( [<System.ParamArray>] input : string array ) =
-    a |> Automaton.Tango ( List.ofSeq input )
+    let mapped = List.ofArray input |> List.map( fun item -> [item] )
+    a |> Automaton.Tango ( List.ofSeq mapped )
 
   /// <summary>
   ///   True if <param name="symbol"></param> is a part of the alphabet of the formula.
