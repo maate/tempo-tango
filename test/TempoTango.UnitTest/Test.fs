@@ -19,11 +19,11 @@ module Tests =
 //    let nexus = np * ""
     let nounPhrase = "( prep ? ( art ? ( adj U ( noun ? fverb ) ) ) )" // art W ( adj W noun) ... would mean that article can occur multiple times
 
-    let s = "art & adj W noun"
+    let s = "art ? ( adj W noun )"
 //    "prep? art?";
-    let a = Parser.Parse "G F p ∧ F(q ∧ G ¬ r)" |> CleanExpression |> NegativeNormalForm |> Set.singleton |> Automaton.ConstructAutomatonFrom
+    let a = Parser.Parse s |> CleanExpression |> NegativeNormalForm |> Set.singleton |> Automaton.ConstructAutomatonFrom
 //    printfn "%s" ( a.transitions.ToString() )
-    let g = Automaton.ToGraph a
+    let g = Automaton.ToGraph a true
 
     let writer = new System.IO.StringWriter()
     Graph.PrintGraph writer g;

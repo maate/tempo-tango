@@ -26,15 +26,19 @@ module internal Automaton =
     alphabet: Set<string>;
   }
 
-  let linkToString edge =
+  let linkToString edge isSimple =
     let format_conds conds =
       String.concat " & " (List.map LinearTemporalLogic.ToString conds)
-    match edge with
-    | Epsilon(postpones)       -> "ε" + (String.concat "" (List.map (fun f -> ", !" + (LinearTemporalLogic.ToString(f))) postpones))
-    | Sigma(conds, postpones)  -> "Σ" + (format_conds conds) + (String.concat "" (List.map (fun f -> ", " + (LinearTemporalLogic.ToString(f))) postpones))
 
-  let TransitionToString { edge = edge; s = s; t = t } =
-    Printf.sprintf "%s -> %s (%s)" (LinearTemporalLogic.SetToString s) (LinearTemporalLogic.SetToString t) (linkToString edge)
+    if( isSimple )
+    then
+      match edge with
+        | Epsilon(_)       -> "ε"
+        | Sigma(conds, _)  -> format_conds conds
+    else
+      match edge with
+        | Epsilon(postpones)       -> "ε" + (String.concat "" (List.map (fun f -> ", !" + (LinearTemporalLogic.ToString(f))) postpones))
+        | Sigma(conds, postpones)  -> "Σ" + (format_conds conds) + (String.concat "" (List.map (fun f -> ", " + (LinearTemporalLogic.ToString(f))) postpones))
 
   let rec FullGBA transitions ( state : Set<expression> ) =
     let isKnown trans transitions =
@@ -92,7 +96,7 @@ module internal Automaton =
     { gba with alphabet = alphabet }
 
   /// Returns the Graph form of the automaton
-  let ToGraph automaton =
+  let ToGraph automaton isSimple =
     let set_to_s = SetToString
     let g = (Graph.NewGraph "Automaton")
     let IsStart s = List.exists ((=) s) automaton.starts
@@ -113,7 +117,7 @@ module internal Automaton =
 
       let g = (addNodeFn s) g s_string_key
       let g = (addNodeFn t) g t_string_key
-      Graph.edge g s_string_key t_string_key (linkToString edge)
+      Graph.edge g s_string_key t_string_key (linkToString edge isSimple)
     ) g automaton.transitions
 
   let uniquePostpones transitions =
@@ -184,7 +188,7 @@ module internal Automaton =
             | True -> Sigma([], ps)
             | prop -> Sigma([prop], ps)
         end
-        | _ -> failwith (Printf.sprintf "Unable to merge %s with %s" (linkToString l.edge) (linkToString r.edge))
+        | _ -> failwith (Printf.sprintf "Unable to merge %s with %s" (linkToString l.edge true) (linkToString r.edge true))
     in
     { l with edge = merged_link }
 
