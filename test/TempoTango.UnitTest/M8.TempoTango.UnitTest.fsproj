@@ -10,7 +10,7 @@
     <RootNamespace>TempoTango.UnitTest</RootNamespace>
     <AssemblyName>M8.TempoTango.UnitTest</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>TempoTango.UnitTest</Name>
+    <Name>M8.TempoTango.UnitTest</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -62,8 +62,8 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\TempoTango\TempoTango.fsproj">
-      <Name>TempoTango</Name>
+    <ProjectReference Include="..\..\src\TempoTango\M8.TempoTango.fsproj">
+      <Name>M8.TempoTango</Name>
       <Project>{820b3856-0688-4164-beac-0c0574a9df51}</Project>
       <Private>True</Private>
     </ProjectReference>
@@ -76,4 +76,3 @@
   </Target>
   -->
 </Project>
-

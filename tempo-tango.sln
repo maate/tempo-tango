@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TempoTango", "src\TempoTango\TempoTango.fsproj", "{820B3856-0688-4164-BEAC-0C0574A9DF51}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "M8.TempoTango", "src\TempoTango\M8.TempoTango.fsproj", "{820B3856-0688-4164-BEAC-0C0574A9DF51}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{BB150674-BDCE-4720-AC2B-FC9CDC254F20}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TempoTango.UnitTest", "test\TempoTango.UnitTest\TempoTango.UnitTest.fsproj", "{63F8BABE-A0EA-4AF0-ABDF-A62B6378A46D}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "M8.TempoTango.UnitTest", "test\TempoTango.UnitTest\M8.TempoTango.UnitTest.fsproj", "{63F8BABE-A0EA-4AF0-ABDF-A62B6378A46D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TempoTango.Console", "test\TempoTango.Console\TempoTango.Console.csproj", "{E1F86C1C-84C2-47F9-8D4E-668C4ADD9A7B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M8.TempoTango.Console", "test\TempoTango.Console\M8.TempoTango.Console.csproj", "{E1F86C1C-84C2-47F9-8D4E-668C4ADD9A7B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -10,7 +10,7 @@
     <RootNamespace>tempo_tango</RootNamespace>
     <AssemblyName>tempo-tango</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>TempoTango</Name>
+    <Name>M8.TempoTango</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -69,4 +69,3 @@
   </Target>
   -->
 </Project>
-
