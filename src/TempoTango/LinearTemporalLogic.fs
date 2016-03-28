@@ -87,7 +87,7 @@ module internal LinearTemporalLogic =
   let rec ToString exp = 
     let print_paren exp =
       match exp with
-        | True | False | Prop(_) | Not(_) | Next(_) | Finally(_) | Globally(_)
+        | True | False | Prop(_) | Not(_) | Next(_) | Finally(_) | Globally(_) | Empty
             -> ToString exp
         | _ -> "(" + ( ToString exp ) + ")"
       in

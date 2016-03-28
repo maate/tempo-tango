@@ -238,7 +238,7 @@ module internal Automaton =
       let curInput = input.Head
       let rec accept ( e : expression list ) =
         e.All( fun i -> match i with
-                          | Empty         -> curInput = []
+                          | Empty         -> curInput = [] || curInput.Any( fun item -> item = "" )
                           | Not Empty     -> curInput.Any()
                           | Prop p        -> curInput.Contains p
                           | Not( Prop p ) -> not ( curInput.Contains p )

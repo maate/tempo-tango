@@ -22,6 +22,13 @@ type public Tempo( formula ) =
   let a = parse formula
 
   /// <summary>
+  ///   A list of list of input to verify against the Linear Temporal Logic expression provided in the
+  ///   constructor
+  /// </summary>
+  member public this.Tango( input ) =
+    a |> Automaton.Tango ( List.ofSeq input )
+
+  /// <summary>
   ///   A list of input to verify against the Linear Temporal Logic expression provided in the
   ///   constructor
   /// </summary>

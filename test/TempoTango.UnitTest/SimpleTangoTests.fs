@@ -59,9 +59,38 @@ module SimpleTangoTests =
     Assert.IsTrue( tempo.Tango input )
 
   [<Test>]
+  let ``conjunctive noun phrase``() =
+    let tempo = new Tempo( "( art ? ( adj W ( noun ? GE ) ) ) & ( Gsing | Gplur )" )
+
+    let input = [ [ "art"; "sing" ] ]                                       //e.g. the English singular article "a"
+    Assert.IsTrue( tempo.Tango input )
+
+    let input = [ [ "art"; "sing" ]; [ "noun"; "sing" ] ]                   //e.g. the phrase "a man"
+    Assert.IsTrue( tempo.Tango input )
+
+    let input = [ [ "art"; "sing"; "indef" ]; [ "noun"; "sing"; "indef" ] ] //e.g. the phrase "a man"
+    Assert.IsTrue( tempo.Tango input )
+
+    let input = [ [ "art"; "sing"; "indef" ]; [ "noun"; "sing"; "def" ] ]   //e.g. the phrase "a the-man"
+    Assert.IsTrue( tempo.Tango input )
+
+    let input = [ [ "art"; "sing" ]; [ "noun"; "plur" ] ]                   //e.g. the incorrect phrase "a men"
+    Assert.IsFalse( tempo.Tango input )
+
+    let tempo = new Tempo( "( art ? ( adj W ( noun & XGE ) ) ) & ( Gsing | Gplur ) & ( Gindef | Gdef )" )
+
+    let input = [ [ "art"; "sing"; "indef" ]; [ "noun"; "sing"; "indef" ] ] //e.g. the phrase "a man"
+    Assert.IsTrue( tempo.Tango input )
+
+    let input = [ [ "art"; "sing"; "indef" ]; [ "noun"; "sing"; "indef" ]; [ "noun"; "sing"; "indef" ] ] //e.g. the phrase "a man man"
+    Assert.IsFalse( tempo.Tango input )
+
+    let input = [ [ "art"; "sing"; "indef" ]; [ "noun"; "sing"; "def" ] ]   //e.g. the phrase "a the-man"
+    Assert.IsFalse( tempo.Tango input )
+
+  [<Test>]
   let ``noun phrase``() =
-//    let tempo = new Tempo( "art ? ( adj W noun )" ) - warning: this will accept noun noun
-    let tempo = new Tempo( "art ? ( adj W ( noun ? GE ) )" )
+    let tempo = new Tempo( "art ? ( adj W ( noun ? GE ) )" ) // note that "art ? ( adj W noun )" will accept e.g. noun noun
 
     let input = [ "art" ]
 
