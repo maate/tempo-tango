@@ -27,7 +27,7 @@ type public Tempo( formula ) =
   ///   A list of list of input to verify against the Linear Temporal Logic expression provided in the
   ///   constructor
   /// </summary>
-  member public this.Tango( input : List<List<string>> ) =
+  member public this.Tango( input : IEnumerable<IEnumerable<string>> ) =
     let mapped = List.ofSeq input |> List.map( fun item1 -> List.ofSeq item1 |> List.map( fun item2 -> item2 ) )
     a |> Automaton.Tango ( mapped )
 
