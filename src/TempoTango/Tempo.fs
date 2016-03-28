@@ -4,6 +4,8 @@ open M8.TempoTango.Automaton
 open M8.TempoTango.LinearTemporalLogic
 open M8.TempoTango.Parser
 
+open System.Collections.Generic
+
 /// <summary>
 ///   Initializes an instance of the Tempo class using the <param name="formula"></param>
 ///   as a linear temporal logic expression such as "a & Xb".
@@ -25,8 +27,16 @@ type public Tempo( formula ) =
   ///   A list of list of input to verify against the Linear Temporal Logic expression provided in the
   ///   constructor
   /// </summary>
+  member public this.Tango( input : List<List<string>> ) =
+    let mapped = List.ofSeq input |> List.map( fun item1 -> List.ofSeq item1 |> List.map( fun item2 -> item2 ) )
+    a |> Automaton.Tango ( mapped )
+
+  /// <summary>
+  ///   A list of list of input to verify against the Linear Temporal Logic expression provided in the
+  ///   constructor
+  /// </summary>
   member public this.Tango( input ) =
-    a |> Automaton.Tango ( List.ofSeq input )
+    a |> Automaton.Tango ( input )
 
   /// <summary>
   ///   A list of input to verify against the Linear Temporal Logic expression provided in the
