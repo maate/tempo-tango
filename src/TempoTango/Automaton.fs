@@ -26,6 +26,16 @@ module internal Automaton =
     alphabet: Set<string>;
   }
 
+  let GetStartTransition automaton =
+    {
+      edge = Sigma([], []);
+      s    = ( automaton.starts.Item 0 );
+      t    = ( automaton.starts.Item 0 )
+    }
+
+  let IsStartTransition automaton transition =
+    transition = ( GetStartTransition automaton )
+
   let linkToString edge isSimple =
     let format_conds conds =
       String.concat " & " (List.map LinearTemporalLogic.ToString conds)
@@ -206,8 +216,9 @@ module internal Automaton =
   let public ConstructAutomatonFrom ltl_set =
     ltl_set |> constructFrom |> skipEpsilons |> joinSigmas
 
-  let rec IsFinal automaton ( states : state list ) =
-    let transitions = automaton.transitions |> Set.filter( fun trans -> states.Contains trans.s )
+  let rec IsFinal automaton ( transition : transition ) =
+    let findTransitionsTo ( states : state list ) transitions = automaton.transitions |> Set.filter( fun trans -> states.Contains trans.s )
+    let transitions = automaton.transitions |> findTransitionsTo [transition.t]
 
     let rec hasEmpty ( e : expression list ) =
       e.All( fun i -> match i with
@@ -225,15 +236,23 @@ module internal Automaton =
                                                       | _                          -> false )
 
     let epsilonTransitions = transitions |> emptyTransitions
-                                         |> Set.map( fun trans -> trans.t )
                                          |> Set.toList
 
-    transitions.Any( fun trans -> states.Any( fun s -> s = trans.t ) ) || epsilonTransitions.Any() && IsFinal automaton epsilonTransitions
+    transitions.Any( fun t -> t.t = t.s || t.t = transition.s )
+      || epsilonTransitions.Any( fun t -> IsFinal automaton t )
 
-  let rec TangoInternal input automaton ( nextStates : state list ) =
+  let rec TangoInternal input automaton ( transition : transition ) matches =
+
+    let getProps transition =
+      match transition.edge with
+        | Sigma( l, _ ) -> List.fold( fun total e -> FindProps total e ) [] l
+        | _             -> failwith "Expected Sigma transition"
 
     if input = [] then
-      IsFinal automaton nextStates
+      if IsFinal automaton transition then
+        Some( matches )
+      else
+        None
     else
       let curInput = input.Head
       let rec accept ( e : expression list ) =
@@ -246,18 +265,16 @@ module internal Automaton =
                           | And( l, r )   -> accept [l] && accept [r]
                           | _             -> failwith "expected Disjunction, Conjunction, Empty, Prop or Not Prop" )
 
-      let findTransitions ( nextStates : state list ) = automaton.transitions |> Set.filter( fun trans -> nextStates.Contains trans.s )
-                                                                              |> Set.filter( fun trans -> match trans.edge with
-                                                                                                            | Sigma( l, r ) -> accept l
-                                                                                                            | _             -> true )
+      let acceptedTransitionsFrom ( nextState : state ) = automaton.transitions |> Set.filter( fun trans -> nextState = trans.s )
+                                                                                |> Set.filter( fun trans -> match trans.edge with
+                                                                                                              | Sigma( l, r ) -> accept l
+                                                                                                              | _             -> true )
 
-      let transitions = findTransitions nextStates
+      let transitions = acceptedTransitionsFrom transition.t |> Set.toList
 
-      let nextStates = transitions |> Set.map( fun item -> item.t ) |> Set.toList
-      match ( Set.toList transitions ) with
-        | []         -> false
-        | head :: _  -> TangoInternal input.Tail automaton nextStates
-      // TODO: Accepting states
+      match transitions with
+        | []         -> None
+        | head :: _  -> transitions |> List.tryPick( fun trans -> TangoInternal input.Tail automaton trans ( matches@[(getProps trans)] ) )
 
   let Tango input automaton =
-    TangoInternal input automaton automaton.starts
+    TangoInternal input automaton ( GetStartTransition automaton ) []

@@ -54,6 +54,7 @@
     <Compile Include="Automaton.fs" />
     <Compile Include="Parser.fs" />
     <None Include="packages.config" />
+    <Compile Include="MatchInfo.fs" />
     <Compile Include="Tempo.fs" />
     <Compile Include="AssemblyInfo.fs" />
   </ItemGroup>

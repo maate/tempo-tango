@@ -13,28 +13,28 @@ module EmptyString =
   let ``Empty string cannot parse word``() =
     let a = parse "E"
     let input = [ [ "a" ] ]
-    Assert.IsFalse( a |> Tango input )
+    Assert.AreEqual( a |> Tango input, None )
 
   [<Test>]
   let ``Empty string can parse empty input``() =
     let a = parse "E"
     let input = [ [ ] ]
-    Assert.IsTrue( a |> Tango input )
+    Assert.IsTrue( ( a |> Tango input ).IsSome )
 
   [<Test>]
   let ``Empty string can parse array of empty input``() =
     let a = parse "E"
     let input = [ []; [] ]
-    Assert.IsTrue( a |> Tango input )
+    Assert.IsTrue( ( a |> Tango input ).IsSome )
 
   [<Test>]
   let ``Not empty can parse a token``() =
     let a = parse "!E"
     let input = [ [ "a" ] ]
-    Assert.IsTrue( a |> Tango input )
+    Assert.IsTrue( ( a |> Tango input ).IsSome )
 
   [<Test>]
   let ``Not empty cannot parse an empty input``() =
     let a = parse "!E"
     let input = [ [ ] ]
-    Assert.IsFalse( a |> Tango input )
+    Assert.AreEqual( a |> Tango input, None )

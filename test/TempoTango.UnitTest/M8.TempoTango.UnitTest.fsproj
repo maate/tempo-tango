@@ -48,6 +48,7 @@
     <Compile Include="AlphabetTest.fs" />
     <Compile Include="SimpleTangoTests.fs" />
     <Compile Include="EmptyString.fs" />
+    <Compile Include="DataStructureTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
