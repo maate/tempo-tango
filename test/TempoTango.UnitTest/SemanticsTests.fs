@@ -456,3 +456,45 @@ module SemanticsTests =
 
     Assert.IsTrue( result.IsSome )
     Assert.That( result.Value, Is.EqualTo( [ [ "q" ] ] ) )
+
+  [<Test>]
+  let ``Empty's are true when no input``() =
+    let s = "E"
+    let a = parse s
+
+    let input = [ [ ] ]
+    let result = a |> Tango input
+
+    Assert.IsTrue( result.IsSome )
+    Assert.That( result.Value, Is.EqualTo( [ [ ] ] ) )
+
+  [<Test>]
+  let ``Empty's are false when input``() =
+    let s = "E"
+    let a = parse s
+
+    let input = [ [ "a" ] ]
+    let result = a |> Tango input
+
+    Assert.IsTrue( result.IsNone )
+
+  [<Test>]
+  let ``Non-Empty's are true when input``() =
+    let s = "!E"
+    let a = parse s
+
+    let input = [ [ "a" ] ]
+    let result = a |> Tango input
+
+    Assert.IsTrue( result.IsSome )
+    Assert.That( result.Value, Is.EqualTo( [ [ "a" ] ] ) )
+
+  [<Test>]
+  let ``Non-Empty's are false when no input``() =
+    let s = "!E"
+    let a = parse s
+
+    let input = [ [ ] ]
+    let result = a |> Tango input
+
+    Assert.IsTrue( result.IsNone )
