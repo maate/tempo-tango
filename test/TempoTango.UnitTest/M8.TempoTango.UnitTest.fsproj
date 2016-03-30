@@ -49,6 +49,8 @@
     <Compile Include="SimpleTangoTests.fs" />
     <Compile Include="EmptyString.fs" />
     <Compile Include="DataStructureTests.fs" />
+    <Compile Include="OperatorPrecedenceTests.fs" />
+    <Compile Include="SemanticsTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

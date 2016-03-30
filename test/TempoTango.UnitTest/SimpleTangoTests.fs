@@ -10,7 +10,7 @@ module SimpleTangoTests =
   let private parse s = Parser.Parse s |> CleanExpression |> NegativeNormalForm |> Set.singleton |> Automaton.ConstructAutomatonFrom
 
   [<Test>]
-  let ``Output can be reduced from input disjunctino``() =
+  let ``Output can be reduced from input disjunction``() =
     let a = parse( "( article & XGE | ( article & X( adjective W ( noun & XGE ) ) ) ) & ( Gsingular | Gplural ) & ( Gindefinite | Gdefinite )" )
 
     let input = [ [ "article"; "definite"; "singular"; "verb" ] ]
