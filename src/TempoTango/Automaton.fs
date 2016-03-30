@@ -21,9 +21,10 @@ module internal Automaton =
   end
 
   type automaton = {
-    starts: state list;
-    transitions: Set<transition>;
-    alphabet: Set<string>;
+    starts: state list
+    transitions: Set<transition>
+    alphabet: Set<string>
+    untilFormula: Set<expression>
   }
 
   let GetStartTransition automaton =
@@ -85,7 +86,8 @@ module internal Automaton =
 
     let automaton = { starts      = [l.starts.Item 0; r.starts.Item 0];
                       transitions = set [];
-                      alphabet    = set [] }
+                      alphabet    = set [];
+                      untilFormula= set [] }
 
     let transitions_l = l.transitions |> startsWithAnyOf l.starts
     let transitions_r = r.transitions |> startsWithAnyOf r.starts
@@ -103,8 +105,16 @@ module internal Automaton =
                   | Sigma( exps, _ ) -> List.fold( FindProps ) a exps
                   | _ -> a ) [] transitions
 
+  let GetUntilFormula transitions =
+    let untilFormulas = Set.fold( fun a trans ->
+                                    match trans.edge with
+                                      | Sigma( _, r ) -> r::a
+                                      | _             -> failwith "Expected Sigma transition" ) [] transitions
+    let untilFormula = untilFormulas |> List.sortBy ( fun elist -> elist |> List.sumBy( fun e -> sizeOf e ) ) |> List.rev
+    untilFormula.Head
+
   let public constructFrom start_state =
-    let gba = { starts = [start_state]; alphabet = set []; transitions = FullGBA Set.empty start_state }
+    let gba = { starts = [start_state]; alphabet = set []; transitions = FullGBA Set.empty start_state; untilFormula = set [] }
     let alphabet = GetAlphabet gba.transitions |> Set.ofList
     { gba with alphabet = alphabet }
 
@@ -216,12 +226,16 @@ module internal Automaton =
       mergeToParallels transitions trans ) [] automaton.transitions
     { automaton with transitions = Set.ofList transitions }
 
+  let addUntilFormula gba =
+    let untilFormula = GetUntilFormula gba.transitions |> Set.ofList
+    { gba with untilFormula = untilFormula }
+
   let public ConstructAutomatonFrom ltl_set =
-    ltl_set |> constructFrom |> skipEpsilons |> joinSigmas
+    ltl_set |> constructFrom |> skipEpsilons |> joinSigmas |> addUntilFormula
 
   let rec IsFinal automaton ( transition : transition ) =
-    let findTransitionsTo ( states : state list ) transitions = automaton.transitions |> Set.filter( fun trans -> states.Contains trans.s )
-    let transitions = automaton.transitions |> findTransitionsTo [transition.t]
+    let findTransitionsTo state transitions = automaton.transitions |> Set.filter( fun trans -> state = trans.s )
+    let transitions = automaton.transitions |> findTransitionsTo transition.t
 
     let rec hasEmpty ( e : expression list ) =
       e.All( fun i -> match i with
@@ -231,7 +245,7 @@ module internal Automaton =
                           | Not( Prop p ) -> false
                           | Or( l, r )    -> hasEmpty [l] || hasEmpty [r]
                           | And( l, r )   -> hasEmpty [l] && hasEmpty [r]
-                          | _             -> failwith "expected Disjunction, Conjunction, Empty, Prop or Not Prop" )
+                          | _             -> failwith "Expected Disjunction, Conjunction, Empty, Prop or Not Prop" )
 
     let emptyTransitions = Set.filter( fun trans -> match trans.edge with
                                                       | Sigma( l, _ ) when l.Any() -> hasEmpty l
@@ -241,8 +255,15 @@ module internal Automaton =
     let epsilonTransitions = transitions |> emptyTransitions
                                          |> Set.toList
 
-    transitions.Any( fun t -> t.t = t.s || t.t = transition.s )
-      || epsilonTransitions.Any( fun t -> IsFinal automaton t )
+    let getUntilCondition transition = match transition.edge with
+                                         | Sigma( _, r ) -> r
+                                         | _             -> failwith "Expected Sigma transition"
+
+    if ( getUntilCondition transition |> Set.ofList ) <> automaton.untilFormula then
+      false
+    else
+      transitions.Any( fun t -> t.t = t.s || t.t = transition.s )
+        || epsilonTransitions.Any( fun t -> IsFinal automaton t )
 
   let rec TangoInternal input automaton ( transition : transition ) matches =
 
@@ -293,12 +314,15 @@ module internal Automaton =
 
       let transitionComparer l r = if sizeOfTransition l < sizeOfTransition r then -1 elif sizeOfTransition l > sizeOfTransition r then 1 else 0
 
-      let transitions = acceptedTransitionsFrom transition.t |> Set.toList |> List.sortWith transitionComparer |> List.rev
+      let transitions = acceptedTransitionsFrom transition.t |> Set.toList
+                                                             |> List.sortWith transitionComparer
+                                                             |> List.rev
 
       let intersect i t = if IsEmptyTransition t then
                             i // anything matches
                           else
-                            ( Set.ofList i ) |> Set.intersect ( Set.ofList ( acceptedProps t curInput ) ) |> Set.toList
+                            ( Set.ofList i ) |> Set.intersect ( Set.ofList ( acceptedProps t curInput ) )
+                                             |> Set.toList
 
       match transitions with
         | []         -> None
