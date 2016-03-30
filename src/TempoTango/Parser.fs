@@ -30,21 +30,23 @@ module internal Parser =
   let primitive = choice[t1; t2; t3; f1; f2; empty1; empty2; prop] <|> between (str_ws "(") (str_ws ")") expr
   opp.TermParser <- ws >>. primitive .>> ws
 
-  opp.AddOperator( InfixOperator( "&", ws, 1, Associativity.Left, fun l r -> And( l, r ) ) )
-  opp.AddOperator( InfixOperator( "∧", ws, 1, Associativity.Left, fun l r -> And( l, r ) ) )
-  opp.AddOperator( InfixOperator( "|", ws, 2, Associativity.Left, fun l r -> Or( l, r ) ) )
-  opp.AddOperator( InfixOperator( "∨", ws, 2, Associativity.Left, fun l r -> Or( l, r ) ) )
-  opp.AddOperator( InfixOperator( "U", ws, 3, Associativity.Left, fun l r -> Until( l, r ) ) )
-  opp.AddOperator( InfixOperator( "R", ws, 3, Associativity.Left, fun l r -> Release( l, r ) ) )
-  opp.AddOperator( InfixOperator( "W", ws, 3, Associativity.Left, fun l r -> WeakUntil( l, r ) ) )
-  opp.AddOperator( InfixOperator( "->", ws, 3, Associativity.Left, fun l r -> Implicate( l, r ) ) )
-  opp.AddOperator( InfixOperator( "?", ws, 3, Associativity.Left, fun l r -> Optional( l, r ) ) )
+  opp.AddOperator( PrefixOperator( "!", ws, 100, true, fun x -> Not( x ) ) )
+  opp.AddOperator( PrefixOperator( "¬", ws, 100, true, fun x -> Not( x ) ) )
+  opp.AddOperator( PrefixOperator( "X", ws, 100, true, fun x -> Next( x ) ) )
+  opp.AddOperator( PrefixOperator( "F", ws, 100, true, fun x -> Finally( x ) ) )
+  opp.AddOperator( PrefixOperator( "G", ws, 100, true, fun x -> Globally( x ) ) )
 
-  opp.AddOperator( PrefixOperator( "!", ws, 4, true, fun x -> Not( x ) ) )
-  opp.AddOperator( PrefixOperator( "¬", ws, 4, true, fun x -> Not( x ) ) )
-  opp.AddOperator( PrefixOperator( "X", ws, 4, true, fun x -> Next( x ) ) )
-  opp.AddOperator( PrefixOperator( "F", ws, 4, true, fun x -> Finally( x ) ) )
-  opp.AddOperator( PrefixOperator( "G", ws, 4, true, fun x -> Globally( x ) ) )
+  opp.AddOperator( InfixOperator( "&", ws, 10, Associativity.Left, fun l r -> And( l, r ) ) )
+  opp.AddOperator( InfixOperator( "∧", ws, 10, Associativity.Left, fun l r -> And( l, r ) ) )
+  opp.AddOperator( InfixOperator( "U", ws, 9, Associativity.Left, fun l r -> Until( l, r ) ) )
+  opp.AddOperator( InfixOperator( "R", ws, 9, Associativity.Left, fun l r -> Release( l, r ) ) )
+  opp.AddOperator( InfixOperator( "W", ws, 9, Associativity.Left, fun l r -> WeakUntil( l, r ) ) )
+  opp.AddOperator( InfixOperator( "?", ws, 9, Associativity.Left, fun l r -> Optional( l, r ) ) )
+
+  opp.AddOperator( InfixOperator( "|", ws, 8, Associativity.Left, fun l r -> Or( l, r ) ) )
+  opp.AddOperator( InfixOperator( "∨", ws, 8, Associativity.Left, fun l r -> Or( l, r ) ) )
+
+  opp.AddOperator( InfixOperator( "->", ws, 5, Associativity.Left, fun l r -> Implicate( l, r ) ) )
 
   let syntax = expr .>> eof
 
