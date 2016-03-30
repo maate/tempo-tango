@@ -28,13 +28,16 @@ module internal Automaton =
 
   let GetStartTransition automaton =
     {
-      edge = Sigma([], []);
-      s    = ( automaton.starts.Item 0 );
+      edge = Sigma([], [])
+      s    = ( automaton.starts.Item 0 )
       t    = ( automaton.starts.Item 0 )
     }
 
   let IsStartTransition automaton transition =
     transition = ( GetStartTransition automaton )
+
+  let IsEmptyTransition transition =
+    transition.edge = Sigma([], [])
 
   let linkToString edge isSimple =
     let format_conds conds =
@@ -263,18 +266,47 @@ module internal Automaton =
                           | Not( Prop p ) -> not ( curInput.Contains p )
                           | Or( l, r )    -> accept [l] || accept [r]
                           | And( l, r )   -> accept [l] && accept [r]
-                          | _             -> failwith "expected Disjunction, Conjunction, Empty, Prop or Not Prop" )
+                          | _             -> failwith "Expected Disjunction, Conjunction, Empty, Prop or Not Prop" )
+
+      let rec accepted ( elist : expression list ) input =
+        elist |> List.fold ( fun a e -> match e with
+                                          | Empty         -> a@curInput
+                                          | Not Empty     -> a@curInput
+                                          | Prop p        -> a@( curInput|>List.filter (fun i -> i = p) )
+                                          | Not( Prop p ) -> a@curInput // because we know that the expression is already accepted and the accepted properties are delimited negatively
+                                          | Or( l, r )    -> (accepted [l] input)@(accepted [r] input)
+                                          | And( l, r )   -> (accepted [l] input)@(accepted [r] input)
+                                          | _             -> failwith "Expected Disjunction, Conjunction, Empty, Prop or Not Prop" ) []
+
+      let acceptedProps transition input = match transition.edge with
+                                                   | Sigma( l, _ ) -> accepted l input
+                                                   | _             -> failwith "Expected Sigma transition"
 
       let acceptedTransitionsFrom ( nextState : state ) = automaton.transitions |> Set.filter( fun trans -> nextState = trans.s )
                                                                                 |> Set.filter( fun trans -> match trans.edge with
                                                                                                               | Sigma( l, r ) -> accept l
                                                                                                               | _             -> true )
 
-      let transitions = acceptedTransitionsFrom transition.t |> Set.toList
+      let sizeOfTransition trans = match trans.edge with
+                                     | Sigma( l, _ ) -> List.sumBy( fun item -> sizeOf item ) l
+                                     | _             -> failwith "Expected Sigma transition"
+
+      let transitionComparer l r = if sizeOfTransition l < sizeOfTransition r then -1 elif sizeOfTransition l > sizeOfTransition r then 1 else 0
+
+      let transitions = acceptedTransitionsFrom transition.t |> Set.toList |> List.sortWith transitionComparer |> List.rev
+
+      let intersect i t = if IsEmptyTransition t then
+                            i // anything matches
+                          else
+                            ( Set.ofList i ) |> Set.intersect ( Set.ofList ( acceptedProps t curInput ) ) |> Set.toList
 
       match transitions with
         | []         -> None
-        | head :: _  -> transitions |> List.tryPick( fun trans -> TangoInternal input.Tail automaton trans ( matches@[(getProps trans)] ) )
+        | head :: _  -> transitions |> List.tryPick( fun trans -> TangoInternal input.Tail automaton trans ( (intersect curInput trans)::matches ) )
 
   let Tango input automaton =
-    TangoInternal input automaton ( GetStartTransition automaton ) []
+    let retval = TangoInternal input automaton ( GetStartTransition automaton ) []
+    if retval.IsSome then
+      retval.Value |> List.rev |> Some
+    else
+      retval
