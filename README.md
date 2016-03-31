@@ -1,6 +1,8 @@
 ﻿
 tempo-tango is a .NET interpreter for Linear Temporal Logic in F#.
 
+Check out the wiki for a more elaborate introduction: https://github.com/maate/tempo-tango/wiki
+
 It is based on [this](https://github.com/tomykaira/ltl2ba) ML implementation by tomykaira
 
 ## Quick Start
