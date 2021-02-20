@@ -262,7 +262,7 @@ tempo.Tango [ [ "a" ]; [ "b" ] ]  // success
 tempo.Tango [ [ "a"; "b" ] ]      // failure (if a is matched, b has to be matched at the next point in time)
 ```
 
-# Run's
+# Tangos (Evaluations)
 Tempo-tango is initialized by using the `Tempo` class:
 
 In F#:
