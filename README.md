@@ -42,7 +42,7 @@ The input symbols is then checked against the automaton. The symbols are evaluat
 
 Proposition names are written in alphanumeric lowercase.
 
-## Quick overview of supported operators
+## Quick overview of supported operators from Linear Temporal Logic
 The following operators are supported.
 
 ```
