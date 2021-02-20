@@ -1,7 +1,5 @@
 ﻿
-tempo-tango is a .NET interpreter for Linear Temporal Logic in F#.
-
-Check out the wiki for a more elaborate introduction: https://github.com/maate/tempo-tango/wiki
+tempo-tango is a .NET interpreter for Linear Temporal Logic in F#. Tempo-tango talks about time as events in the future. Tempo-tango extends normal propositional logic by including a time dimension.
 
 It is based on [this](https://github.com/tomykaira/ltl2ba) ML implementation by tomykaira
 
@@ -33,7 +31,8 @@ In F#:
     tempo.TangosWith "verb"        // false
 ```
 
-Internally, the expression `art ? ( adj W noun )` is converted to this automaton:
+Internally, the expression `art ? ( adj W noun )` is converted to th
+utomaton:
 
 ![GBA](/docs/np-example.png)
 
@@ -62,7 +61,7 @@ R                         Releases
 ?                         Binary Optional (either l holds, and then r holds next, or r holds)
 ```
 
-Tempo-tango talks about time as events in the future. Tempo-tango extends normal propositional logic by including a time dimension. All supported operators are described below.
+All supported operators are described below.
 
 ## Symbols from propositional logic
 Tempo-tango supports the basic propositional symbols:
